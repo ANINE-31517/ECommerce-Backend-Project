@@ -21,4 +21,65 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+.idea
+**/.idea
+../.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/.idea/
+*.iml
+*.iws
+
+# Logs
+logs/
+*.log
+
+# Target & Build
+/target/
+/build/
+
+# Dependencies
+.mvn/
+!**/src/main/**/.mvn
+!**/src/test/**/.mvn
+
+# Compiled class files
+*.class
+
+# Maven & Gradle
+/.mvn/
+/.gradle/
+/build/
+
+# Environment files
+.env
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+application.properties
+application.yml
+application-*.properties
+application-*.yml
+
+# Generated files
+/out/
+/.idea/
+/node_modules/
+
+# Database
+*.h2.db
+*.mv.db
+*.db
+*.sqlite
 replay_pid*
+
+mvnw
+mvnw.cmd
+HELP.md
