@@ -8,22 +8,14 @@ import lombok.Setter;
 import java.util.List;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "sellers")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class Seller {
-
-    @Id
-    private UUID id;
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
+public class Seller extends User {
 
     private String gst;
     private String companyContact;

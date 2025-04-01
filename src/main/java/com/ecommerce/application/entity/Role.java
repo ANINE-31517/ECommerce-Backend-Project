@@ -22,7 +22,8 @@ public class Role {
 
     private String authority;
 
-    @ManyToMany(mappedBy = "roles")
-    private List<User> users;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User users;
 }
 
