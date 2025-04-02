@@ -1,9 +1,10 @@
 package com.ecommerce.application.service;
 
-
 import com.ecommerce.application.DTO.CustomerRegistrationRequest;
+import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -25,6 +27,9 @@ public class CustomerService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ActivationTokenRepository activationTokenRepository;
 
     @Transactional
     public void registerCustomer(CustomerRegistrationRequest request) {
@@ -46,7 +51,14 @@ public class CustomerService {
 
         customerRepository.save(customer);
 
-        String activationToken = UUID.randomUUID().toString();
+        String activationTokenString = UUID.randomUUID().toString();
+
+        ActivationToken activationToken = new ActivationToken();
+        activationToken.setToken(activationTokenString);
+        activationToken.setCustomer(customer);
+        activationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+
+        activationTokenRepository.save(activationToken);
 
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationToken;
         emailService.sendEmail(request.getEmail(), "Activate Your Account",

@@ -27,6 +27,9 @@ public class Customer extends User {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<ProductReview> productReviews;
 
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private ActivationToken activationToken;
+
     public String getContact() {
         return contact;
     }
