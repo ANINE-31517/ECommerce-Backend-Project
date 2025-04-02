@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
@@ -28,5 +30,12 @@ public class CustomerController {
     public ResponseEntity<?> activateCustomer(@RequestParam("token") String token) {
         return activationService.activateCustomer(token);
     }
+
+    @PostMapping("/resend-activation-link")
+    public ResponseEntity<?> resendActivationLink(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        return activationService.resendActivationLink(email);
+    }
+
 }
 
