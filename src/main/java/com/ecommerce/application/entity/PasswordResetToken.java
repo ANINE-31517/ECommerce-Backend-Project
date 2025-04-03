@@ -14,20 +14,16 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivationToken {
+public class PasswordResetToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(unique = true, nullable = false)
     private String token;
-
-    @OneToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
-
     private LocalDateTime expiryDate;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
 
