@@ -16,7 +16,7 @@ public interface ActivationTokenRepository extends JpaRepository<ActivationToken
     Optional<ActivationToken> findByToken(String token);
 
     @Modifying
-    @Query("delete from ActivationToken t WHERE t.customer = :customer")
+    @Query("delete from ActivationToken t where t.customer = :customer")
     void deleteByCustomer(@Param("customer") Customer customer);
 }
 

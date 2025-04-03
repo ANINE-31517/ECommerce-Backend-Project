@@ -23,4 +23,5 @@ public class Seller extends User {
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private List<Product> products;
+
 }

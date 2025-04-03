@@ -1,5 +1,6 @@
 package com.ecommerce.application.entity;
 
+import com.ecommerce.application.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,10 +21,14 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String authority;
+    @Enumerated(EnumType.STRING)
+    private RoleEnum authority;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User users;
+    @OneToMany(mappedBy = "roles", cascade = CascadeType.ALL)
+    private List<User> users;
+
+    public Role(RoleEnum authority) {
+        this.authority = authority;
+    }
 }
 

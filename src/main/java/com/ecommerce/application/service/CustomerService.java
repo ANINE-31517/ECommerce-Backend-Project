@@ -3,6 +3,8 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.DTO.CustomerRegistrationRequest;
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
+import com.ecommerce.application.entity.Role;
+import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
@@ -48,6 +50,8 @@ public class CustomerService {
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
         customer.setActive(false);
         customer.setContact(request.getContact());
+
+        customer.setRoles(new Role(RoleEnum.CUSTOMER));
 
         customerRepository.save(customer);
 

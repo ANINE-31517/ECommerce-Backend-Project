@@ -28,6 +28,7 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User users;
+    private User user;
+
 }
 

@@ -17,6 +17,10 @@ public class CustomerRegistrationRequest {
     @Pattern(regexp = "^\\+?[1-9][0-9]{7,14}$", message = "Invalid phone number")
     private String contact;
 
+    @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter.")
+    @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter.")
+    @Pattern(regexp = ".*\\d.*", message = "Password must contain at least one number.")
+    @Pattern(regexp = ".*[\\W_].*", message = "Password must contain at least one special character.")
     @NotBlank(message = "Password is mandatory")
     private String password;
 
@@ -29,53 +33,6 @@ public class CustomerRegistrationRequest {
     @NotBlank(message = "Last name is mandatory")
     private String lastName;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getContact() {
-        return contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 }
 
 
