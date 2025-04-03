@@ -15,7 +15,7 @@ public class SellerController {
     private SellerService sellerService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody SellerRegistrationRequest request) {
+    public ResponseEntity<String> registerCustomer(@Valid @RequestBody SellerRegistrationRequest request) {
         sellerService.registerSeller(request);
         return ResponseEntity.ok("Seller registered successfully.");
     }

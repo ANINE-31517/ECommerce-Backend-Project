@@ -21,20 +21,22 @@ public class CustomerController {
     private ActivationService activationService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
+    public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
         customerService.registerCustomer(request);
         return ResponseEntity.ok("Customer registered successfully. Please check your email for activation.");
     }
 
-    @PutMapping("/activate")
-    public ResponseEntity<?> activateCustomer(@RequestParam("token") String token) {
-        return activationService.activateCustomer(token);
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateCustomer(@RequestParam("token") String token) {
+        activationService.activateCustomer(token);
+        return ResponseEntity.ok("Account activated successfully");
     }
 
     @PostMapping("/resend-activation-link")
-    public ResponseEntity<?> resendActivationLink(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> resendActivationLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
-        return activationService.resendActivationLink(email);
+        activationService.resendActivationLink(email);
+        return ResponseEntity.ok("A new activation link has been sent to your email.");
     }
 
 }

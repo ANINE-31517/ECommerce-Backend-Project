@@ -9,7 +9,6 @@ import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,7 @@ public class SellerService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseEntity<?> registerSeller(SellerRegistrationRequest request) {
+    public void registerSeller(SellerRegistrationRequest request) {
 
         if (sellerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new CustomException("Email already exists");
@@ -79,7 +78,6 @@ public class SellerService {
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
 
-        return ResponseEntity.ok(Map.of("message", "Seller registered successfully. Awaiting approval."));
     }
 }
 

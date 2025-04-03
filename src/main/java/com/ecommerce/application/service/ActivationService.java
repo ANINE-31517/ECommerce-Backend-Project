@@ -6,13 +6,13 @@ import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,13 +28,15 @@ public class ActivationService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${token.time}")
+    private Integer tokenTime;
+
     @Transactional
-    public ResponseEntity<?> activateCustomer(String token) {
+    public void activateCustomer(String token) {
         Optional<ActivationToken> tokenOpt = tokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Invalid activation token"));
+            throw new CustomException("Invalid activation token");
         }
 
         ActivationToken activationToken = tokenOpt.orElseThrow(() -> new CustomException("Token not found"));
@@ -45,7 +47,7 @@ public class ActivationService {
             ActivationToken newActivationToken = new ActivationToken();
             newActivationToken.setToken(newToken);
             newActivationToken.setCustomer(customer);
-            newActivationToken.setExpiryDate(LocalDateTime.now().plusHours(3));
+            newActivationToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
 
             tokenRepository.save(newActivationToken);
             tokenRepository.delete(activationToken);
@@ -53,8 +55,7 @@ public class ActivationService {
             emailService.sendEmail(customer.getEmail(), "New Activation Link",
                     "Your activation link has expired. Use this new link: http://localhost:8080/api/customers/activate?token=" + newToken);
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Activation token expired. A new activation email has been sent."));
+            throw new CustomException("Activation token expired. A new activation email has been sent.");
         }
 
         customer.setActive(true);
@@ -65,22 +66,19 @@ public class ActivationService {
         emailService.sendEmail(customer.getEmail(), "Account Activated",
                 "Your account has been successfully activated!");
 
-        return ResponseEntity.ok(Map.of("message", "Account activated successfully"));
     }
 
     @Transactional
-    public ResponseEntity<?> resendActivationLink(String email) {
+    public void resendActivationLink(String email) {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
         if (customerOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Email not found"));
+            throw new CustomException("Email not found");
         }
 
         Customer customer = customerOpt.orElseThrow(() -> new CustomException("Customer not found"));
 
         if (customer.isActive()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Account is already activated"));
+            throw new CustomException("Account is already activated");
         }
 
         tokenRepository.deleteByCustomer(customer);
@@ -89,15 +87,13 @@ public class ActivationService {
         ActivationToken activationToken = new ActivationToken();
         activationToken.setToken(newToken);
         activationToken.setCustomer(customer);
-        activationToken.setExpiryDate(LocalDateTime.now().plusHours(3));
+        activationToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
 
         tokenRepository.save(activationToken);
 
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + newToken;
         emailService.sendEmail(customer.getEmail(), "Resend Activation Link",
                 "Click the link to activate your account: <a href='" + activationLink + "'>Activate</a>");
-
-        return ResponseEntity.ok(Map.of("message", "A new activation link has been sent to your email."));
     }
 }
 

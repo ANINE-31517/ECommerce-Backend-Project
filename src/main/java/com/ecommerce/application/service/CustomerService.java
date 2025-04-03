@@ -11,11 +11,14 @@ import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,11 @@ public class CustomerService {
 
     @Autowired
     private ActivationTokenRepository activationTokenRepository;
+
+    @Value("${token.time}")
+    private Integer tokenTime;
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
     @Transactional
     public void registerCustomer(CustomerRegistrationRequest request) {
@@ -60,11 +68,12 @@ public class CustomerService {
         ActivationToken activationToken = new ActivationToken();
         activationToken.setToken(activationTokenString);
         activationToken.setCustomer(customer);
-        activationToken.setExpiryDate(LocalDateTime.now().plusHours(3));
+        activationToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
 
         activationTokenRepository.save(activationToken);
 
-        String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationToken;
+        String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationTokenString;
+        logger.info("Activation Token: {}", activationLink);
         emailService.sendEmail(request.getEmail(), "Activate Your Account",
                 "Click the link to activate: <a href='" + activationLink + "'>Activate</a>");
 
