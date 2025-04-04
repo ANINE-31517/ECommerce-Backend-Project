@@ -39,7 +39,7 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody CustomerLoginRequest request) {
+    public ResponseEntity<String> loginCustomer(@Valid @RequestBody CustomerLoginRequest request) {
         customerService.loginCustomer(request);
         return ResponseEntity.ok("Customer logged-in successfully!");
     }

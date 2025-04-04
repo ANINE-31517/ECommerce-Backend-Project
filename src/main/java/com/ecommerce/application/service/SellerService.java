@@ -1,7 +1,10 @@
 package com.ecommerce.application.service;
 
+import com.ecommerce.application.DTO.CustomerLoginRequest;
+import com.ecommerce.application.DTO.SellerLoginRequest;
 import com.ecommerce.application.DTO.SellerRegistrationRequest;
 import com.ecommerce.application.entity.Address;
+import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.enums.RoleEnum;
@@ -9,6 +12,8 @@ import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +29,9 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
 
     @Transactional
     public void registerSeller(SellerRegistrationRequest request) {
@@ -73,6 +81,37 @@ public class SellerService {
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
 
+    }
+
+    public void loginSeller(SellerLoginRequest request) {
+
+        Seller seller = sellerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException("Invalid credentials"));
+
+        if (!seller.isActive())
+            throw new CustomException("Account is not activated");
+
+        if (seller.isLocked())
+            throw new CustomException("Account is locked");
+
+        if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
+            seller.setInvalidAttemptCount(seller.getInvalidAttemptCount() + 1);
+
+            if (seller.getInvalidAttemptCount() >= 3) {
+                seller.setLocked(true);
+                emailService.sendEmail(seller.getEmail(), "Account Locked",
+                        "Your account is locked due to 3 failed login attempts.");
+            }
+
+            sellerRepository.save(seller);
+            throw new CustomException("Invalid credentials");
+        }
+
+        seller.setInvalidAttemptCount(0);
+        sellerRepository.save(seller);
+
+        String token = jwtService.generateToken(seller);
+        logger.info("accessToken {}", token);
     }
 }
 
