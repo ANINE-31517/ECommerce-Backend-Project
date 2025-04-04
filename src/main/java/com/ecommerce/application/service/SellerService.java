@@ -8,27 +8,22 @@ import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.SellerRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Service
+@RequiredArgsConstructor
 public class SellerService {
 
-    @Autowired
-    private SellerRepository sellerRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final SellerRepository sellerRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void registerSeller(SellerRegistrationRequest request) {

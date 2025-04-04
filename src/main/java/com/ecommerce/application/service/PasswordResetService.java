@@ -8,7 +8,7 @@ import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.PasswordResetTokenRepository;
 import com.ecommerce.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,19 +17,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PasswordResetService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordResetTokenRepository tokenRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${token.time}")
     private Integer tokenTime;

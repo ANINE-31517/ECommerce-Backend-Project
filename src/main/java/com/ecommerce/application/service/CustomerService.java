@@ -1,5 +1,6 @@
 package com.ecommerce.application.service;
 
+import com.ecommerce.application.DTO.CustomerLoginRequest;
 import com.ecommerce.application.DTO.CustomerRegistrationRequest;
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
@@ -10,7 +11,6 @@ import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,17 +24,11 @@ import org.slf4j.LoggerFactory;
 @RequiredArgsConstructor
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ActivationTokenRepository activationTokenRepository;
+    private final CustomerRepository customerRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
+    private final ActivationTokenRepository activationTokenRepository;
+    private final JwtService jwtService;
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -77,6 +71,37 @@ public class CustomerService {
         emailService.sendEmail(request.getEmail(), "Activate Your Account",
                 "Click the link to activate: <a href='" + activationLink + "'>Activate</a>");
 
+    }
+
+    public void loginCustomer(CustomerLoginRequest request) {
+
+        Customer customer = customerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException("Invalid credentials"));
+
+        if (!customer.isActive())
+            throw new CustomException("Account is not activated");
+
+        if (customer.isLocked())
+            throw new CustomException("Account is locked");
+
+        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
+            customer.setInvalidAttemptCount(customer.getInvalidAttemptCount() + 1);
+
+            if (customer.getInvalidAttemptCount() >= 3) {
+                customer.setLocked(true);
+                emailService.sendEmail(customer.getEmail(), "Account Locked",
+                        "Your account is locked due to 3 failed login attempts.");
+            }
+
+            customerRepository.save(customer);
+            throw new CustomException("Invalid credentials");
+        }
+
+        customer.setInvalidAttemptCount(0);
+        customerRepository.save(customer);
+
+        String token = jwtService.generateToken(customer);
+        logger.info("accessToken {}", token);
     }
 }
 

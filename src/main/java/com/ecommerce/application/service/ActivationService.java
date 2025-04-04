@@ -6,10 +6,7 @@ import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -17,16 +14,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+
 public class ActivationService {
 
-    @Autowired
-    private ActivationTokenRepository tokenRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private EmailService emailService;
+    private final ActivationTokenRepository tokenRepository;
+    private final CustomerRepository customerRepository;
+    private final EmailService emailService;
 
     @Value("${token.time}")
     private Integer tokenTime;
