@@ -34,13 +34,14 @@ public class Application {
 	@EventListener(ApplicationReadyEvent.class)
 	public void adminCreation() {
 		String adminEmail = "admin123@gmail.com";
+		String password = "admin@123";
 
 		if (userRepository.findByEmail(adminEmail).isEmpty()) {
 			User adminUser = new User();
 			adminUser.setEmail(adminEmail);
 			adminUser.setFirstName("Admin");
 			adminUser.setLastName("User");
-			adminUser.setPassword(passwordEncoder.encode("admin123"));
+			adminUser.setPassword(passwordEncoder.encode(password));
 			adminUser.setActive(true);
 			adminUser.setPasswordUpdateDate(LocalDateTime.now());
 			adminUser.setRoles(new Role(RoleEnum.ADMIN));
