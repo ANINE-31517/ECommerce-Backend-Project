@@ -1,10 +1,8 @@
 package com.ecommerce.application.service;
 
-import com.ecommerce.application.DTO.CustomerLoginRequest;
 import com.ecommerce.application.DTO.SellerLoginRequest;
 import com.ecommerce.application.DTO.SellerRegistrationRequest;
 import com.ecommerce.application.entity.Address;
-import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.enums.RoleEnum;

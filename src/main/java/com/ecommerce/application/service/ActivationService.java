@@ -30,11 +30,15 @@ public class ActivationService {
         Optional<ActivationToken> tokenOpt = tokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
-            throw new CustomException("Invalid activation token");
+            throw new CustomException("Invalid activation token!");
         }
 
         ActivationToken activationToken = tokenOpt.orElseThrow(() -> new CustomException("Token not found"));
         Customer customer = activationToken.getCustomer();
+
+        if(customer.isActive()) {
+            throw new CustomException("Account is already activated!");
+        }
 
         if (activationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             String newToken = UUID.randomUUID().toString();

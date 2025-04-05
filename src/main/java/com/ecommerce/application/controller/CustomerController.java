@@ -2,11 +2,15 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.DTO.CustomerLoginRequest;
 import com.ecommerce.application.DTO.CustomerRegistrationRequest;
+import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.ActivationService;
 import com.ecommerce.application.service.CustomerService;
+import com.ecommerce.application.service.TokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -18,6 +22,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ActivationService activationService;
+    private final TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
@@ -42,6 +47,24 @@ public class CustomerController {
     public ResponseEntity<String> loginCustomer(@Valid @RequestBody CustomerLoginRequest request) {
         customerService.loginCustomer(request);
         return ResponseEntity.ok("Customer logged-in successfully!");
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
+        if (request == null || !request.startsWith("Bearer ")) {
+            throw new CustomException("Access token is missing or invalid format!");
+        }
+
+        String token = request.substring(7);
+
+        if (!tokenService.isTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired access token!");
+        }
+
+        tokenService.invalidateToken(token);
+
+        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
 
 }
