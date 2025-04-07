@@ -67,7 +67,7 @@ public class CustomerService {
         activationTokenRepository.save(activationToken);
 
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationTokenString;
-        logger.info("Activation Token: {}", activationLink);
+        logger.info("Activation Link: {}", activationLink);
         emailService.sendEmail(request.getEmail(), "Activate Your Account",
                 "Click the link to activate: <a href='" + activationLink + "'>Activate</a>");
 

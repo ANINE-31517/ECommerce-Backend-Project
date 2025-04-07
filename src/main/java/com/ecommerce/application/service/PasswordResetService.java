@@ -9,6 +9,8 @@ import com.ecommerce.application.repository.PasswordResetTokenRepository;
 import com.ecommerce.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+
+    private static final Logger logger = LoggerFactory.getLogger(PasswordResetService.class);
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -50,6 +54,8 @@ public class PasswordResetService {
         tokenRepository.save(resetToken);
 
         String resetLink = "http://localhost:8080/api/reset/forgot-password?token=" + token;
+        logger.info("Reset Token: {}", token);
+
         emailService.sendEmail(user.getEmail(), "Reset Password", "Click the link to reset your password: <a href='" + resetLink + "'>Reset</a>");
 
     }
@@ -63,8 +69,10 @@ public class PasswordResetService {
             throw new CustomException("Invalid token.");
         }
 
+        User user = token.getUser();
+
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            tokenRepository.delete(token);
+            tokenRepository.deleteByUser(user);
             throw new CustomException("Token has expired.");
         }
 
@@ -72,12 +80,10 @@ public class PasswordResetService {
             throw new CustomException("Passwords do not match.");
         }
 
-        User user = token.getUser();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
-        tokenRepository.delete(token);
-
+        tokenRepository.deleteByUser(user);
     }
 }
 

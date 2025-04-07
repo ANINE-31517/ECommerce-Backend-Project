@@ -30,7 +30,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .claim("role", user.getRoles().getAuthority().name())
+                .claim("role", user.getRoles().getAuthority())
                 .setIssuedAt(new Date())
                 .setExpiration(Date.from(Instant.now().plus(accessTime, ChronoUnit.HOURS)))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
@@ -49,5 +49,15 @@ public class JwtService {
             return false;
         }
     }
+
+    public String extractUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }
 

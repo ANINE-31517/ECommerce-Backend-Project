@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +17,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,6 +31,11 @@ public class Role {
 
     public Role(RoleEnum authority) {
         this.authority = authority;
+    }
+
+    @Override
+    public String getAuthority() {
+        return authority.name();
     }
 }
 
