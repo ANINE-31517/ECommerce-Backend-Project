@@ -30,7 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/customers/register",
             "/api/customers/activate",
             "/api/customers/resend-activation-link",
-            "/api/sellers/register"
+            "/api/customers/login",
+            "/api/sellers/login",
+            "/api/sellers/register",
+            "/api/admin/login"
     );
 
     @Override

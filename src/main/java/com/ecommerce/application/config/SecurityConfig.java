@@ -4,9 +4,11 @@ import com.ecommerce.application.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,12 +29,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/customers/register", "/api/customers/activate", "/api/customers/resend-activation-link").permitAll()
-                        .requestMatchers("/api/sellers/register").permitAll()
+                        .requestMatchers("/api/customers/register", "/api/customers/activate", "/api/customers/resend-activation-link", "/api/customers/login").permitAll()
+                        .requestMatchers("/api/sellers/register", "/api/sellers/login").permitAll()
                         .requestMatchers("/api/reset/forgot-password", "/api/reset/reset-password").permitAll()
+                        .requestMatchers("/api/admin/login").permitAll()
                         .requestMatchers("/api/customers/**").hasAuthority("CUSTOMER")
                         .requestMatchers("/api/sellers/**").hasAuthority("SELLER")
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/test/seller").hasAuthority("SELLER")
+                        .requestMatchers("/api/test/admin").hasAuthority("ADMIN")
+                        .requestMatchers("/api/test/customer").hasAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -54,6 +60,11 @@ public class SecurityConfig {
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
 
