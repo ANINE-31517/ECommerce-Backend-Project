@@ -1,11 +1,11 @@
-package com.ecommerce.application.DTO;
+package com.ecommerce.application.CO;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class ResetPasswordRequest {
+public class ResetPasswordCO {
 
     @NotNull(message = "Token is Required!")
     private String token;

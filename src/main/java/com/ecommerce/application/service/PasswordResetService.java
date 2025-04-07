@@ -1,7 +1,7 @@
 package com.ecommerce.application.service;
 
-import com.ecommerce.application.DTO.ForgotPasswordRequest;
-import com.ecommerce.application.DTO.ResetPasswordRequest;
+import com.ecommerce.application.CO.ForgotPasswordCO;
+import com.ecommerce.application.CO.ResetPasswordCO;
 import com.ecommerce.application.entity.PasswordResetToken;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.CustomException;
@@ -33,7 +33,7 @@ public class PasswordResetService {
     private Integer tokenTime;
 
     @Transactional
-    public void forgotPassword(ForgotPasswordRequest request) {
+    public void forgotPassword(ForgotPasswordCO request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (user == null) {
@@ -61,7 +61,7 @@ public class PasswordResetService {
     }
 
     @Transactional
-    public void resetPassword(ResetPasswordRequest request) {
+    public void resetPassword(ResetPasswordCO request) {
         PasswordResetToken token = tokenRepository.findByToken(request.getToken())
                 .orElse(null);
 
@@ -70,6 +70,10 @@ public class PasswordResetService {
         }
 
         User user = token.getUser();
+
+        if(user.isLocked()) {
+            throw new CustomException("Account is Locked!");
+        }
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.deleteByUser(user);

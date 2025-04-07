@@ -1,7 +1,7 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.DTO.SellerLoginRequest;
-import com.ecommerce.application.DTO.SellerRegistrationRequest;
+import com.ecommerce.application.CO.SellerLoginCO;
+import com.ecommerce.application.CO.SellerRegistrationCO;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.SellerService;
@@ -21,13 +21,13 @@ public class SellerController {
     private final TokenService tokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerCustomer(@Valid @RequestBody SellerRegistrationRequest request) {
+    public ResponseEntity<String> registerCustomer(@Valid @RequestBody SellerRegistrationCO request) {
         sellerService.registerSeller(request);
         return ResponseEntity.ok("Seller registered successfully.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginSeller(@Valid @RequestBody SellerLoginRequest request) {
+    public ResponseEntity<String> loginSeller(@Valid @RequestBody SellerLoginCO request) {
         sellerService.loginSeller(request);
         return ResponseEntity.ok("Seller logged-in successfully!");
     }

@@ -1,7 +1,7 @@
 package com.ecommerce.application.service;
 
-import com.ecommerce.application.DTO.CustomerLoginRequest;
-import com.ecommerce.application.DTO.CustomerRegistrationRequest;
+import com.ecommerce.application.CO.CustomerLoginCO;
+import com.ecommerce.application.CO.CustomerRegistrationCO;
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Role;
@@ -36,7 +36,7 @@ public class CustomerService {
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
     @Transactional
-    public void registerCustomer(CustomerRegistrationRequest request) {
+    public void registerCustomer(CustomerRegistrationCO request) {
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new CustomException("Email already exists");
         }
@@ -73,7 +73,7 @@ public class CustomerService {
 
     }
 
-    public void loginCustomer(CustomerLoginRequest request) {
+    public void loginCustomer(CustomerLoginCO request) {
 
         Customer customer = customerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid credentials"));

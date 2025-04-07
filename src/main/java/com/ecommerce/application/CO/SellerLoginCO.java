@@ -1,11 +1,11 @@
-package com.ecommerce.application.DTO;
+package com.ecommerce.application.CO;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CustomerLoginRequest {
+public class SellerLoginCO {
 
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
@@ -14,4 +14,3 @@ public class CustomerLoginRequest {
     @NotBlank(message = "Password is required")
     private String password;
 }
-

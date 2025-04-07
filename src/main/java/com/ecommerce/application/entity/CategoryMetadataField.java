@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "category_metadata_fields")
+@Table(name = "category_metadata_field")
 @Getter
 @Setter
 @NoArgsConstructor

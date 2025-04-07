@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "category_metadata_field_values")
+@Table(name = "category_metadata_field_value")
 @Getter
 @Setter
 @NoArgsConstructor

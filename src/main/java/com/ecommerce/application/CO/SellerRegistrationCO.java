@@ -1,4 +1,4 @@
-package com.ecommerce.application.DTO;
+package com.ecommerce.application.CO;
 
 import com.ecommerce.application.entity.Address;
 import jakarta.validation.constraints.Email;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class SellerRegistrationRequest {
+public class SellerRegistrationCO {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

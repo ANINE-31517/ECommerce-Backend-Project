@@ -1,6 +1,6 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.DTO.AdminLoginRequest;
+import com.ecommerce.application.CO.AdminLoginCO;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.AdminService;
@@ -20,7 +20,7 @@ public class AdminController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginAdmin(@Valid @RequestBody AdminLoginRequest request) {
+    public ResponseEntity<String> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
         adminService.loginAdmin(request);
         return ResponseEntity.ok("Admin logged-in successfully!");
     }

@@ -1,7 +1,7 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.DTO.CustomerLoginRequest;
-import com.ecommerce.application.DTO.CustomerRegistrationRequest;
+import com.ecommerce.application.CO.CustomerLoginCO;
+import com.ecommerce.application.CO.CustomerRegistrationCO;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.ActivationService;
@@ -25,7 +25,7 @@ public class CustomerController {
     private final TokenService tokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
+    public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationCO request) {
         customerService.registerCustomer(request);
         return ResponseEntity.ok("Customer registered successfully. Please check your email for activation.");
     }
@@ -44,7 +44,7 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginCustomer(@Valid @RequestBody CustomerLoginRequest request) {
+    public ResponseEntity<String> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
         customerService.loginCustomer(request);
         return ResponseEntity.ok("Customer logged-in successfully!");
     }

@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/customers/register", "/api/customers/activate", "/api/customers/resend-activation-link", "/api/customers/login").permitAll()
                         .requestMatchers("/api/sellers/register", "/api/sellers/login").permitAll()
                         .requestMatchers("/api/reset/forgot-password", "/api/reset/reset-password").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/admin/login").permitAll()
                         .requestMatchers("/api/customers/**").hasAuthority("CUSTOMER")
                         .requestMatchers("/api/sellers/**").hasAuthority("SELLER")

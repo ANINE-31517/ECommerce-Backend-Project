@@ -1,6 +1,6 @@
 package com.ecommerce.application.service;
 
-import com.ecommerce.application.DTO.AdminLoginRequest;
+import com.ecommerce.application.CO.AdminLoginCO;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.repository.UserRepository;
@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ public class AdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
 
-    public void loginAdmin(AdminLoginRequest request) {
+    public void loginAdmin(AdminLoginCO request) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

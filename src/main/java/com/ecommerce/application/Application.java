@@ -1,5 +1,6 @@
 package com.ecommerce.application;
 
+import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
@@ -7,7 +8,6 @@ import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -15,7 +15,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -33,8 +32,8 @@ public class Application {
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void adminCreation() {
-		String adminEmail = "admin123@gmail.com";
-		String password = "admin@123";
+		String adminEmail = AdminConstant.ADMIN_EMAIL;
+		String password = AdminConstant.ADMIN_PASSWORD;
 
 		if (userRepository.findByEmail(adminEmail).isEmpty()) {
 			User adminUser = new User();
