@@ -1,6 +1,7 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,17 +23,29 @@ public class JwtService {
     @Value("${access.token.time}")
     private Integer accessTime;
 
+    @Value("${refresh.token.time}")
+    private Integer refreshTime;
+
     public JwtService(@Value("${secret.key}") String key) {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(key));
     }
 
-    public String generateToken(User user) {
+    public String generateAccessToken(User user) {
+        return generateToken(user, accessTime, "ACCESS");
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, refreshTime, "REFRESH");
+    }
+
+    public String generateToken(User user, Integer time, String tokenType) {
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("role", user.getRoles().getAuthority())
+                .claim("tokenType", tokenType)
                 .setIssuedAt(new Date())
-                .setExpiration(Date.from(Instant.now().plus(accessTime, ChronoUnit.HOURS)))
+                .setExpiration(Date.from(Instant.now().plus(time, ChronoUnit.HOURS)))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
@@ -40,11 +53,13 @@ public class JwtService {
     public boolean validateToken(String token) {
 
         try {
-            Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
-                    .parseClaimsJws(token);
-            return true;
+                    .parseClaimsJws(token)
+                    .getBody();
+            String tokenType = claims.get("tokenType", String.class);
+            return "ACCESS".equals(tokenType);
         } catch (JwtException e) {
             return false;
         }

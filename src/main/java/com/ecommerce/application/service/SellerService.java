@@ -2,11 +2,13 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SellerService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenService tokenService;
 
     private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
 
@@ -81,7 +84,7 @@ public class SellerService {
 
     }
 
-    public void loginSeller(SellerLoginCO request) {
+    public TokenResponseVO loginSeller(SellerLoginCO request) {
 
         Seller seller = sellerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid credentials"));
@@ -108,8 +111,29 @@ public class SellerService {
         seller.setInvalidAttemptCount(0);
         sellerRepository.save(seller);
 
-        String token = jwtService.generateToken(seller);
-        logger.info("accessToken {}", token);
+        String accessToken = jwtService.generateAccessToken(seller);
+        String refreshToken = jwtService.generateRefreshToken(seller);
+        logger.info("accessToken {}", accessToken);
+        logger.info("refreshToken {}", refreshToken);
+
+        return TokenResponseVO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public void logoutSeller(String request) {
+        if (request == null || !request.startsWith("Bearer ")) {
+            throw new CustomException("Access token is missing or invalid format!");
+        }
+
+        String token = request.substring(7);
+
+        if (!tokenService.isTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired access token!");
+        }
+
+        tokenService.invalidateToken(token);
     }
 }
 

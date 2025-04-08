@@ -2,11 +2,13 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
@@ -29,6 +31,7 @@ public class CustomerService {
     private final PasswordEncoder passwordEncoder;
     private final ActivationTokenRepository activationTokenRepository;
     private final JwtService jwtService;
+    private final TokenService tokenService;
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -73,7 +76,7 @@ public class CustomerService {
 
     }
 
-    public void loginCustomer(CustomerLoginCO request) {
+    public TokenResponseVO loginCustomer(CustomerLoginCO request) {
 
         Customer customer = customerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid credentials"));
@@ -100,8 +103,30 @@ public class CustomerService {
         customer.setInvalidAttemptCount(0);
         customerRepository.save(customer);
 
-        String token = jwtService.generateToken(customer);
-        logger.info("accessToken {}", token);
+        String accessToken = jwtService.generateAccessToken(customer);
+        String refreshToken = jwtService.generateRefreshToken(customer);
+        logger.info("accessToken {}", accessToken);
+        logger.info("refreshToken {}", refreshToken);
+
+        return TokenResponseVO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public void logoutCustomer(String request) {
+
+        if (request == null || !request.startsWith("Bearer ")) {
+            throw new CustomException("Access token is missing or invalid format!");
+        }
+
+        String token = request.substring(7);
+
+        if (!tokenService.isTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired access token!");
+        }
+
+        tokenService.invalidateToken(token);
     }
 }
 

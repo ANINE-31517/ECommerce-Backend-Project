@@ -2,8 +2,7 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
-import com.ecommerce.application.exception.CustomException;
-import com.ecommerce.application.exception.UnauthorizedException;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.SellerService;
 import com.ecommerce.application.service.TokenService;
 import jakarta.validation.Valid;
@@ -27,26 +26,15 @@ public class SellerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginSeller(@Valid @RequestBody SellerLoginCO request) {
-        sellerService.loginSeller(request);
-        return ResponseEntity.ok("Seller logged-in successfully!");
+    public ResponseEntity<TokenResponseVO> loginSeller(@Valid @RequestBody SellerLoginCO request) {
+        TokenResponseVO responseVO = sellerService.loginSeller(request);
+        return ResponseEntity.ok(responseVO);
     }
 
     @PostMapping("/logout")
     @PreAuthorize("hasAuthority('SELLER')")
     public ResponseEntity<String> logoutSeller(@RequestHeader("Authorization") String request) {
-        if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
-        }
-
-        String token = request.substring(7);
-
-        if (!tokenService.isTokenValid(token)) {
-            throw new UnauthorizedException("Invalid or expired access token!");
-        }
-
-        tokenService.invalidateToken(token);
-
+        sellerService.logoutSeller(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
 

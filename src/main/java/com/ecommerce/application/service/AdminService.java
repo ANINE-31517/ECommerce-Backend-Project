@@ -1,8 +1,10 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.AdminLoginCO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,10 +23,11 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
 
-    public void loginAdmin(AdminLoginCO request) {
+    public TokenResponseVO loginAdmin(AdminLoginCO request) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -55,7 +58,28 @@ public class AdminService {
         user.setInvalidAttemptCount(0);
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
-        logger.info("accessToken {}", token);
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        logger.info("accessToken {}", accessToken);
+        logger.info("refreshToken {}", refreshToken);
+
+        return TokenResponseVO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public void logoutAdmin(String request) {
+        if (request == null || !request.startsWith("Bearer ")) {
+            throw new CustomException("Access token is missing or invalid format!");
+        }
+
+        String token = request.substring(7);
+
+        if (!tokenService.isTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired access token!");
+        }
+
+        tokenService.invalidateToken(token);
     }
 }

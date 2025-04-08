@@ -1,6 +1,7 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AdminLoginCO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.AdminService;
@@ -20,26 +21,15 @@ public class AdminController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
-        adminService.loginAdmin(request);
-        return ResponseEntity.ok("Admin logged-in successfully!");
+    public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
+        TokenResponseVO responseVO = adminService.loginAdmin(request);
+        return ResponseEntity.ok(responseVO);
     }
 
     @PostMapping("/logout")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> logoutSeller(@RequestHeader("Authorization") String request) {
-        if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
-        }
-
-        String token = request.substring(7);
-
-        if (!tokenService.isTokenValid(token)) {
-            throw new UnauthorizedException("Invalid or expired access token!");
-        }
-
-        tokenService.invalidateToken(token);
-
+        adminService.logoutAdmin(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
 }

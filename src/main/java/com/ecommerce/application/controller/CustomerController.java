@@ -2,6 +2,7 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.ActivationService;
@@ -44,26 +45,15 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
-        customerService.loginCustomer(request);
-        return ResponseEntity.ok("Customer logged-in successfully!");
+    public ResponseEntity<TokenResponseVO> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
+        TokenResponseVO responseVO = customerService.loginCustomer(request);
+        return ResponseEntity.ok(responseVO);
     }
 
     @PostMapping("/logout")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
-        if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
-        }
-
-        String token = request.substring(7);
-
-        if (!tokenService.isTokenValid(token)) {
-            throw new UnauthorizedException("Invalid or expired access token!");
-        }
-
-        tokenService.invalidateToken(token);
-
+        customerService.logoutCustomer(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
 
