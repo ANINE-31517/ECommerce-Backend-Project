@@ -8,4 +8,5 @@ import lombok.Data;
 public class NewAccessTokenVO {
 
     private String newAccessToken;
+    private String newRefreshToken;
 }

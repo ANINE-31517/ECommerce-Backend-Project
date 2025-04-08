@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class SellerService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
 
     private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
 
@@ -86,6 +89,13 @@ public class SellerService {
 
     public TokenResponseVO loginSeller(SellerLoginCO request) {
 
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
         Seller seller = sellerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid credentials"));
 
@@ -116,6 +126,8 @@ public class SellerService {
         logger.info("accessToken {}", accessToken);
         logger.info("refreshToken {}", refreshToken);
 
+        tokenService.saveTokenPair(seller, accessToken, refreshToken);
+
         return TokenResponseVO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -129,7 +141,7 @@ public class SellerService {
 
         String token = request.substring(7);
 
-        if (!tokenService.isTokenValid(token)) {
+        if (!tokenService.isAccessTokenValid(token)) {
             throw new UnauthorizedException("Invalid or expired access token!");
         }
 

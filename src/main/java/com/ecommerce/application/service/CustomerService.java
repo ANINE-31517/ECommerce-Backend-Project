@@ -14,6 +14,8 @@ import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class CustomerService {
     private final ActivationTokenRepository activationTokenRepository;
     private final JwtService jwtService;
     private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -78,6 +81,13 @@ public class CustomerService {
 
     public TokenResponseVO loginCustomer(CustomerLoginCO request) {
 
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
         Customer customer = customerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid credentials"));
 
@@ -108,6 +118,8 @@ public class CustomerService {
         logger.info("accessToken {}", accessToken);
         logger.info("refreshToken {}", refreshToken);
 
+        tokenService.saveTokenPair(customer, accessToken, refreshToken);
+
         return TokenResponseVO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -122,7 +134,7 @@ public class CustomerService {
 
         String token = request.substring(7);
 
-        if (!tokenService.isTokenValid(token)) {
+        if (!tokenService.isAccessTokenValid(token)) {
             throw new UnauthorizedException("Invalid or expired access token!");
         }
 

@@ -63,6 +63,8 @@ public class AdminService {
         logger.info("accessToken {}", accessToken);
         logger.info("refreshToken {}", refreshToken);
 
+        tokenService.saveTokenPair(user, accessToken, refreshToken);
+
         return TokenResponseVO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -76,7 +78,7 @@ public class AdminService {
 
         String token = request.substring(7);
 
-        if (!tokenService.isTokenValid(token)) {
+        if (!tokenService.isAccessTokenValid(token)) {
             throw new UnauthorizedException("Invalid or expired access token!");
         }
 

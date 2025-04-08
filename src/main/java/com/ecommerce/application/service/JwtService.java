@@ -50,7 +50,7 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
 
         try {
             Claims claims = Jwts.parserBuilder()
@@ -60,6 +60,21 @@ public class JwtService {
                     .getBody();
             String tokenType = claims.get("tokenType", String.class);
             return "ACCESS".equals(tokenType);
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            String tokenType = claims.get("tokenType", String.class);
+            return "REFRESH".equals(tokenType);
         } catch (JwtException e) {
             return false;
         }
