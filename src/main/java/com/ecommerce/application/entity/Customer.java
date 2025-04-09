@@ -30,8 +30,4 @@ public class Customer extends User {
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
     private ActivationToken activationToken;
 
-    public String getFullName() {
-        return getFirstName() + " " + getLastName();
-    }
-
 }

@@ -2,6 +2,8 @@ package com.ecommerce.application.repository;
 
 import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Seller;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +15,6 @@ public interface SellerRepository extends JpaRepository<Seller, UUID> {
     Optional<Seller> findByEmail(String email);
     Optional<Seller> findByGst(String gst);
     Optional<Seller> findByCompanyName(String companyName);
+    Page<Seller> findByEmailContainingIgnoreCase(String email, Pageable pageable);
+    Page<Seller> findAll(Pageable pageable);
 }

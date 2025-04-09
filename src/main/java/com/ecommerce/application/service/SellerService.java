@@ -2,7 +2,9 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
+import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
+import com.ecommerce.application.constant.SellerConstant;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
@@ -14,6 +16,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -148,6 +154,38 @@ public class SellerService {
         }
 
         tokenService.invalidateToken(token);
+    }
+
+    public Page<SellerRegisteredVO> getAllSellers(int pageOffset, int pageSize, String sortBy, String email) {
+
+        List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
+
+        if(!allowedSortFields.contains(sortBy)) {
+            throw new CustomException("Invalid Sort Type");
+        }
+
+        Pageable pageable = PageRequest.of(pageOffset, pageSize, Sort.by(sortBy));
+
+        Page<Seller> sellers;
+        if (email != null && !email.isEmpty()) {
+            sellers = sellerRepository.findByEmailContainingIgnoreCase(email, pageable);
+        } else {
+            sellers = sellerRepository.findAll(pageable);
+        }
+
+        return sellers.map(seller -> convertToSellerRegisteredVO(seller));
+    }
+
+    private SellerRegisteredVO convertToSellerRegisteredVO(Seller seller) {
+        return SellerRegisteredVO.builder()
+                .id(seller.getId())
+                .fullName(seller.getFullName())
+                .email(seller.getEmail())
+                .isActive(seller.isActive())
+                .companyName(seller.getCompanyName())
+                .companyContact(seller.getCompanyContact())
+                .companyAddress(seller.getAddresses().getFirst())
+                .build();
     }
 }
 

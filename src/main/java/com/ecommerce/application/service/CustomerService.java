@@ -2,7 +2,7 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
-import com.ecommerce.application.VO.CustomerListVO;
+import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.constant.CustomerConstant;
 import com.ecommerce.application.entity.ActivationToken;
@@ -151,7 +151,7 @@ public class CustomerService {
         tokenService.invalidateToken(token);
     }
 
-    public Page<CustomerListVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
+    public Page<CustomerRegisteredVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
 
         List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
 
@@ -168,11 +168,11 @@ public class CustomerService {
             customers = customerRepository.findAll(pageable);
         }
 
-        return customers.map(customer -> convertToCustomerListVO(customer));
+        return customers.map(customer -> convertToCustomerRegisteredVO(customer));
     }
 
-    private CustomerListVO convertToCustomerListVO(Customer customer) {
-        return CustomerListVO.builder()
+    private CustomerRegisteredVO convertToCustomerRegisteredVO(Customer customer) {
+        return CustomerRegisteredVO.builder()
                 .id(customer.getId())
                 .fullName(customer.getFullName())
                 .email(customer.getEmail())

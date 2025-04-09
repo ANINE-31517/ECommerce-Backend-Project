@@ -1,10 +1,12 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AdminLoginCO;
-import com.ecommerce.application.VO.CustomerListVO;
+import com.ecommerce.application.VO.CustomerRegisteredVO;
+import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.AdminService;
 import com.ecommerce.application.service.CustomerService;
+import com.ecommerce.application.service.SellerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +21,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final CustomerService customerService;
-
+    private final SellerService sellerService;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
@@ -37,13 +39,25 @@ public class AdminController {
 
     @GetMapping("/getCustomer")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Page<CustomerListVO>> getAllCustomers(
+    public ResponseEntity<Page<CustomerRegisteredVO>> getAllCustomers(
             @RequestParam(defaultValue = "0") int pageOffset,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(required = false) String email
     ) {
-        Page<CustomerListVO> customers = customerService.getAllCustomers(pageOffset, pageSize, sortBy, email);
+        Page<CustomerRegisteredVO> customers = customerService.getAllCustomers(pageOffset, pageSize, sortBy, email);
         return ResponseEntity.ok(customers);
+    }
+
+    @GetMapping("/getSeller")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Page<SellerRegisteredVO>> getAllSellers(
+            @RequestParam(defaultValue = "0") int pageOffset,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false) String email
+    ) {
+        Page<SellerRegisteredVO> sellers = sellerService.getAllSellers(pageOffset, pageSize, sortBy, email);
+        return ResponseEntity.ok(sellers);
     }
 }
