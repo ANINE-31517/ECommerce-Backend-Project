@@ -1,13 +1,13 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AdminLoginCO;
+import com.ecommerce.application.VO.CustomerListVO;
 import com.ecommerce.application.VO.TokenResponseVO;
-import com.ecommerce.application.exception.CustomException;
-import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.AdminService;
-import com.ecommerce.application.service.TokenService;
+import com.ecommerce.application.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final AdminService adminService;
-    private final TokenService tokenService;
+    private final CustomerService customerService;
+
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
@@ -31,5 +32,18 @@ public class AdminController {
     public ResponseEntity<String> logoutSeller(@RequestHeader("Authorization") String request) {
         adminService.logoutAdmin(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
+    }
+
+
+    @GetMapping("/getCustomer")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Page<CustomerListVO>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int pageOffset,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false) String email
+    ) {
+        Page<CustomerListVO> customers = customerService.getAllCustomers(pageOffset, pageSize, sortBy, email);
+        return ResponseEntity.ok(customers);
     }
 }

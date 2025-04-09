@@ -2,7 +2,9 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.VO.CustomerListVO;
 import com.ecommerce.application.VO.TokenResponseVO;
+import com.ecommerce.application.constant.CustomerConstant;
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.entity.Role;
@@ -14,12 +16,17 @@ import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +47,8 @@ public class CustomerService {
     private Integer tokenTime;
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+
+    private static final List<String> ALLOWED_SORT_FIELDS = List.of("id", "fullName", "email", "createdAt");
 
     @Transactional
     public void registerCustomer(CustomerRegistrationCO request) {
@@ -140,6 +149,35 @@ public class CustomerService {
         }
 
         tokenService.invalidateToken(token);
+    }
+
+    public Page<CustomerListVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
+
+        List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
+
+        if(!allowedSortFields.contains(sortBy)) {
+            throw new CustomException("Invalid Sort Type");
+        }
+
+        Pageable pageable = PageRequest.of(pageOffset, pageSize, Sort.by(sortBy));
+
+        Page<Customer> customers;
+        if (email != null && !email.isEmpty()) {
+            customers = customerRepository.findByEmailContainingIgnoreCase(email, pageable);
+        } else {
+            customers = customerRepository.findAll(pageable);
+        }
+
+        return customers.map(customer -> convertToCustomerListVO(customer));
+    }
+
+    private CustomerListVO convertToCustomerListVO(Customer customer) {
+        return CustomerListVO.builder()
+                .id(customer.getId())
+                .fullName(customer.getFullName())
+                .email(customer.getEmail())
+                .isActive(customer.isActive())
+                .build();
     }
 }
 
