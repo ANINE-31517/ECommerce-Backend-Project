@@ -89,6 +89,8 @@ public class SellerService {
         companyAddress.setUser(seller);
         seller.setAddresses(List.of(companyAddress));
 
+        logger.info("Seller ID: {}", seller.getId());
+
         sellerRepository.save(seller);
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
@@ -173,7 +175,7 @@ public class SellerService {
             sellers = sellerRepository.findAll(pageable);
         }
 
-        return sellers.map(seller -> convertToSellerRegisteredVO(seller));
+        return sellers.map(this::convertToSellerRegisteredVO);
     }
 
     private SellerRegisteredVO convertToSellerRegisteredVO(Seller seller) {

@@ -2,6 +2,7 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.VO.CustomerActivatedVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.constant.CustomerConstant;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +83,8 @@ public class CustomerService {
         activationToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
 
         activationTokenRepository.save(activationToken);
+
+        logger.info("Customer ID: {}", customer.getId());
 
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationTokenString;
         logger.info("Activation Link: {}", activationLink);
@@ -177,6 +181,30 @@ public class CustomerService {
                 .fullName(customer.getFullName())
                 .email(customer.getEmail())
                 .isActive(customer.isActive())
+                .build();
+    }
+
+    public CustomerActivatedVO activateCustomer(UUID customerId) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+
+        if (customerOptional.isEmpty()) {
+            throw new CustomException("Customer ID not found!");
+        }
+
+        Customer customer = customerOptional.get();
+
+        if (customer.isActive()) {
+            throw new CustomException("Customer is already activated!");
+        }
+
+        customer.setActive(true);
+        customerRepository.save(customer);
+
+        emailService.sendEmail(customer.getEmail(), "Account Activated",
+                "Your account has been successfully activated!");
+        return CustomerActivatedVO.builder()
+                .isActivated(true)
+                .message("Customer account activated successfully!")
                 .build();
     }
 }

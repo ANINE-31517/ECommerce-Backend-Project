@@ -1,6 +1,7 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AdminLoginCO;
+import com.ecommerce.application.VO.CustomerActivatedVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -60,4 +63,12 @@ public class AdminController {
         Page<SellerRegisteredVO> sellers = sellerService.getAllSellers(pageOffset, pageSize, sortBy, email);
         return ResponseEntity.ok(sellers);
     }
+
+    @PatchMapping("/activateCustomer/{customerId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CustomerActivatedVO> activateCustomer(@PathVariable UUID customerId) {
+        CustomerActivatedVO response = customerService.activateCustomer(customerId);
+        return ResponseEntity.ok(response);
+    }
+
 }
