@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
@@ -74,6 +75,7 @@ public class SellerService {
         seller.setFirstName(request.getFirstName());
         seller.setLastName(request.getLastName());
         seller.setActive(false);
+        seller.setCreatedAt(LocalDateTime.now());
 
         seller.setRoles(new Role(RoleEnum.SELLER));
 

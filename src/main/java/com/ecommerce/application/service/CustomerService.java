@@ -58,6 +58,7 @@ public class CustomerService {
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
         customer.setActive(false);
         customer.setContact(request.getContact());
+        customer.setCreatedAt(LocalDateTime.now());
 
         customer.setRoles(new Role(RoleEnum.CUSTOMER));
 

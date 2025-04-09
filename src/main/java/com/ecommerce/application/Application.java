@@ -44,6 +44,7 @@ public class Application {
 			adminUser.setActive(true);
 			adminUser.setPasswordUpdateDate(LocalDateTime.now());
 			adminUser.setRoles(new Role(RoleEnum.ADMIN));
+			adminUser.setCreatedAt(LocalDateTime.now());
 
 			userRepository.save(adminUser);
 			logger.info("Admin user created: {}", adminUser.getEmail());
