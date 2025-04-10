@@ -2,7 +2,7 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
-import com.ecommerce.application.VO.CustomerActivatedVO;
+import com.ecommerce.application.VO.UserActivatedDeActivateVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.constant.CustomerConstant;
@@ -184,7 +184,7 @@ public class CustomerService {
                 .build();
     }
 
-    public CustomerActivatedVO activateCustomer(UUID customerId) {
+    public UserActivatedDeActivateVO activateCustomer(UUID customerId) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isEmpty()) {
@@ -202,9 +202,33 @@ public class CustomerService {
 
         emailService.sendEmail(customer.getEmail(), "Account Activated",
                 "Your account has been successfully activated!");
-        return CustomerActivatedVO.builder()
+        return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Customer account activated successfully!")
+                .build();
+    }
+
+    public UserActivatedDeActivateVO deActivateCustomer(UUID customerId) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+
+        if (customerOptional.isEmpty()) {
+            throw new CustomException("Customer ID not found!");
+        }
+
+        Customer customer = customerOptional.get();
+
+        if (!customer.isActive()) {
+            throw new CustomException("Customer is already deActivated!");
+        }
+
+        customer.setActive(false);
+        customerRepository.save(customer);
+
+        emailService.sendEmail(customer.getEmail(), "Account deActivated",
+                "Your account has been successfully deActivated!");
+        return UserActivatedDeActivateVO.builder()
+                .isActivated(true)
+                .message("Customer account deActivated successfully!")
                 .build();
     }
 }

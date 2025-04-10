@@ -4,6 +4,7 @@ import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
+import com.ecommerce.application.VO.UserActivatedDeActivateVO;
 import com.ecommerce.application.constant.SellerConstant;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.Role;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
@@ -89,9 +92,10 @@ public class SellerService {
         companyAddress.setUser(seller);
         seller.setAddresses(List.of(companyAddress));
 
+        sellerRepository.save(seller);
+
         logger.info("Seller ID: {}", seller.getId());
 
-        sellerRepository.save(seller);
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
 
@@ -187,6 +191,54 @@ public class SellerService {
                 .companyName(seller.getCompanyName())
                 .companyContact(seller.getCompanyContact())
                 .companyAddress(seller.getAddresses().getFirst())
+                .build();
+    }
+
+    public UserActivatedDeActivateVO activateSeller(UUID sellerId) {
+        Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
+
+        if (sellerOptional.isEmpty()) {
+            throw new CustomException("Seller ID not found!");
+        }
+
+        Seller seller = sellerOptional.get();
+
+        if (seller.isActive()) {
+            throw new CustomException("Seller is already activated!");
+        }
+
+        seller.setActive(true);
+        sellerRepository.save(seller);
+
+        emailService.sendEmail(seller.getEmail(), "Account Activated",
+                "Your account has been successfully activated!");
+        return UserActivatedDeActivateVO.builder()
+                .isActivated(true)
+                .message("Seller account activated successfully!")
+                .build();
+    }
+
+    public UserActivatedDeActivateVO deActivateSeller(UUID sellerId) {
+        Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
+
+        if (sellerOptional.isEmpty()) {
+            throw new CustomException("Seller ID not found!");
+        }
+
+        Seller seller = sellerOptional.get();
+
+        if (!seller.isActive()) {
+            throw new CustomException("Seller is already deActivated!");
+        }
+
+        seller.setActive(false);
+        sellerRepository.save(seller);
+
+        emailService.sendEmail(seller.getEmail(), "Account deActivated",
+                "Your account has been successfully deActivated!");
+        return UserActivatedDeActivateVO.builder()
+                .isActivated(true)
+                .message("Seller account deActivated successfully!")
                 .build();
     }
 }

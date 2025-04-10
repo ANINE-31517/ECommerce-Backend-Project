@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CustomerActivatedVO {
+public class UserActivatedDeActivateVO {
 
     private boolean isActivated;
     private String message;

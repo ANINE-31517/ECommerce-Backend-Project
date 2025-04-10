@@ -1,7 +1,7 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AdminLoginCO;
-import com.ecommerce.application.VO.CustomerActivatedVO;
+import com.ecommerce.application.VO.UserActivatedDeActivateVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
@@ -66,8 +66,29 @@ public class AdminController {
 
     @PatchMapping("/activateCustomer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<CustomerActivatedVO> activateCustomer(@PathVariable UUID customerId) {
-        CustomerActivatedVO response = customerService.activateCustomer(customerId);
+    public ResponseEntity<UserActivatedDeActivateVO> activateCustomer(@PathVariable UUID customerId) {
+        UserActivatedDeActivateVO response = customerService.activateCustomer(customerId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/activateSeller/{sellerId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<UserActivatedDeActivateVO> activateSeller(@PathVariable UUID sellerId) {
+        UserActivatedDeActivateVO response = sellerService.activateSeller(sellerId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/deActivateCustomer/{customerId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<UserActivatedDeActivateVO> deActivateCustomer(@PathVariable UUID customerId) {
+        UserActivatedDeActivateVO response = customerService.deActivateCustomer(customerId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/deActivateSeller/{sellerId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<UserActivatedDeActivateVO> deActivateSeller(@PathVariable UUID sellerId) {
+        UserActivatedDeActivateVO response = sellerService.deActivateSeller(sellerId);
         return ResponseEntity.ok(response);
     }
 
