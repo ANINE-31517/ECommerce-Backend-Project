@@ -4,7 +4,7 @@ import com.ecommerce.application.CO.RefreshTokenCO;
 import com.ecommerce.application.VO.NewAccessTokenVO;
 import com.ecommerce.application.entity.Token;
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.TokenRepository;
 import jakarta.transaction.Transactional;
@@ -12,11 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +52,7 @@ public class TokenService {
 
     public void invalidateToken(String accessToken) {
         Token token = tokenRepository.findByAccessToken(accessToken)
-                .orElseThrow(() -> new CustomException("Token not found"));
+                .orElseThrow(() -> new BadRequestException("Token not found"));
 
         token.setAccessTokenInvalidated(true);
         token.setRefreshTokenInvalidated(true);

@@ -3,7 +3,7 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -31,7 +31,7 @@ public class ImageService {
     private final ImageStorageConfig imageStorageConfig;
     private final UserRepository userRepository;
 
-    private final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
+    private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
 
     public void uploadUserImage(UUID userId, MultipartFile file) throws IOException {
@@ -39,13 +39,13 @@ public class ImageService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if(userOpt.isEmpty()) {
-            throw new CustomException("User Id not found!");
+            throw new BadRequestException("User Id not found!");
         }
 
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename()).toLowerCase();
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         if (!allowedExtensions.contains(extension)) {
-            throw new CustomException("Only JPG, JPEG, PNG, BMP files are allowed!");
+            throw new BadRequestException("Only jpg, jpeg, png, bmp files are allowed!");
         }
 
         String filePath = getUserImagePath(userId, extension);
@@ -60,7 +60,7 @@ public class ImageService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if(userOpt.isEmpty()) {
-            throw new CustomException("User Id not found!");
+            throw new BadRequestException("User Id not found!");
         }
 
         Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "users");

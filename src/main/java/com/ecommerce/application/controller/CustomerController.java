@@ -2,9 +2,9 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.VO.CustomerProfileVO;
+import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.VO.TokenResponseVO;
-import com.ecommerce.application.exception.CustomException;
-import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.service.ActivationService;
 import com.ecommerce.application.service.CustomerService;
 import com.ecommerce.application.service.TokenService;
@@ -55,6 +55,13 @@ public class CustomerController {
     public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
         customerService.logoutCustomer(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
+    }
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<CustomerProfileVO> getCustomerProfile() {
+        CustomerProfileVO profile = customerService.getCustomerProfile();
+        return ResponseEntity.ok(profile);
     }
 
 }

@@ -2,18 +2,17 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
-import com.ecommerce.application.VO.UserActivatedDeActivateVO;
-import com.ecommerce.application.VO.CustomerRegisteredVO;
-import com.ecommerce.application.VO.TokenResponseVO;
+import com.ecommerce.application.VO.*;
+import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.CustomerConstant;
-import com.ecommerce.application.entity.ActivationToken;
-import com.ecommerce.application.entity.Customer;
-import com.ecommerce.application.entity.Role;
+import com.ecommerce.application.constant.ImageConstant;
+import com.ecommerce.application.entity.*;
 import com.ecommerce.application.enums.RoleEnum;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
+import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +25,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -44,20 +46,23 @@ public class CustomerService {
     private final JwtService jwtService;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
+    private final ImageStorageConfig imageStorageConfig;
+
+    private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
+    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+
 
     @Value("${token.time}")
     private Integer tokenTime;
 
-    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
-
     @Transactional
     public void registerCustomer(CustomerRegistrationCO request) {
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new CustomException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new CustomException("Passwords do not match");
+            throw new BadRequestException("Passwords do not match");
         }
 
         Customer customer = new Customer();
@@ -101,13 +106,13 @@ public class CustomerService {
         );
 
         Customer customer = customerRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
         if (!customer.isActive())
-            throw new CustomException("Account is not activated");
+            throw new BadRequestException("Account is not activated");
 
         if (customer.isLocked())
-            throw new CustomException("Account is locked");
+            throw new BadRequestException("Account is locked");
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
             customer.setInvalidAttemptCount(customer.getInvalidAttemptCount() + 1);
@@ -119,7 +124,7 @@ public class CustomerService {
             }
 
             customerRepository.save(customer);
-            throw new CustomException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         customer.setInvalidAttemptCount(0);
@@ -141,7 +146,7 @@ public class CustomerService {
     public void logoutCustomer(String request) {
 
         if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
+            throw new BadRequestException("Access token is missing or invalid format!");
         }
 
         String token = request.substring(7);
@@ -158,7 +163,7 @@ public class CustomerService {
         List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
 
         if(!allowedSortFields.contains(sortBy)) {
-            throw new CustomException("Invalid Sort Type");
+            throw new BadRequestException("Invalid Sort Type");
         }
 
         Pageable pageable = PageRequest.of(pageOffset, pageSize, Sort.by(sortBy));
@@ -186,13 +191,13 @@ public class CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isEmpty()) {
-            throw new CustomException("Customer ID not found!");
+            throw new BadRequestException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
 
         if (customer.isActive()) {
-            throw new CustomException("Customer is already activated!");
+            throw new BadRequestException("Customer is already activated!");
         }
 
         customer.setActive(true);
@@ -210,13 +215,13 @@ public class CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isEmpty()) {
-            throw new CustomException("Customer ID not found!");
+            throw new BadRequestException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
 
         if (!customer.isActive()) {
-            throw new CustomException("Customer is already deActivated!");
+            throw new BadRequestException("Customer is already deActivated!");
         }
 
         customer.setActive(false);
@@ -227,6 +232,46 @@ public class CustomerService {
         return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Customer account deActivated successfully!")
+                .build();
+    }
+
+    public CustomerProfileVO getCustomerProfile() {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Customer)) {
+            throw new BadRequestException("Current user is not a customer!");
+        }
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(user.getId());
+
+        if (optionalCustomer.isEmpty()) {
+            throw new BadRequestException("Customer not found!");
+        }
+
+        Customer customer = optionalCustomer.get();
+        return convertToCustomerProfileVO(customer);
+
+    }
+
+    private CustomerProfileVO convertToCustomerProfileVO(Customer customer) {
+
+        String imageUrl = "Image not uploaded!";
+
+        for (String ext : allowedExtensions) {
+            Path path = Paths.get(imageStorageConfig.getBasePath(), "users", customer.getId().toString() + "." + ext);
+            if (Files.exists(path)) {
+                imageUrl = "http://localhost:8080/api/images/users/" + customer.getId();
+                break;
+            }
+        }
+
+        return CustomerProfileVO.builder()
+                .id(customer.getId())
+                .firstName(customer.getFirstName())
+                .lastName(customer.getLastName())
+                .isActive(customer.isActive())
+                .image(imageUrl)
+                .contact(customer.getContact())
                 .build();
     }
 }

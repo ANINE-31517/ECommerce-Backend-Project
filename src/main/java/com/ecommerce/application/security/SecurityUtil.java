@@ -1,7 +1,7 @@
 package com.ecommerce.application.security;
 
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ public class SecurityUtil {
     public static User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new CustomException("No authenticated user found!");
+            throw new BadRequestException("No authenticated user found!");
         }
         return (User) authentication.getPrincipal();
     }

@@ -4,7 +4,7 @@ import com.ecommerce.application.CO.ForgotPasswordCO;
 import com.ecommerce.application.CO.ResetPasswordCO;
 import com.ecommerce.application.entity.PasswordResetToken;
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.PasswordResetTokenRepository;
 import com.ecommerce.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -37,11 +37,11 @@ public class PasswordResetService {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (user == null) {
-            throw new CustomException("Email does not exist.");
+            throw new BadRequestException("Email does not exist.");
         }
 
         if (!user.isActive()) {
-            throw new CustomException("Account is not activated.");
+            throw new BadRequestException("Account is not activated.");
         }
 
         tokenRepository.deleteByUser(user);
@@ -66,22 +66,22 @@ public class PasswordResetService {
                 .orElse(null);
 
         if (token == null) {
-            throw new CustomException("Invalid token.");
+            throw new BadRequestException("Invalid token.");
         }
 
         User user = token.getUser();
 
         if(user.isLocked()) {
-            throw new CustomException("Account is Locked!");
+            throw new BadRequestException("Account is Locked!");
         }
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.deleteByUser(user);
-            throw new CustomException("Token has expired.");
+            throw new BadRequestException("Token has expired.");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new CustomException("Passwords do not match.");
+            throw new BadRequestException("Passwords do not match.");
         }
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));

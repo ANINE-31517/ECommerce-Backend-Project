@@ -14,7 +14,7 @@ import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.SellerRepository;
 import com.ecommerce.application.security.SecurityUtil;
@@ -56,25 +56,25 @@ public class SellerService {
     private final ImageStorageConfig imageStorageConfig;
 
     private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
-    private final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
+    private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
     @Transactional
     public void registerSeller(SellerRegistrationCO request) {
 
         if (sellerRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new CustomException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         if (sellerRepository.findByGst(request.getGst()).isPresent()) {
-            throw new CustomException("Gst Number already exists");
+            throw new BadRequestException("Gst Number already exists");
         }
 
         if (sellerRepository.findByCompanyName(request.getCompanyName()).isPresent()) {
-            throw new CustomException("Company Name already exists");
+            throw new BadRequestException("Company Name already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new CustomException("Password Mismatched");
+            throw new BadRequestException("Password Mismatched");
         }
 
         if (request.getCompanyAddress() == null ||
@@ -83,7 +83,7 @@ public class SellerService {
                 isBlank(request.getCompanyAddress().getAddressLine()) ||
                 request.getCompanyAddress().getZipCode() == null ||
                 isBlank(request.getCompanyAddress().getLabel())) {
-            throw new CustomException("Address fields cannot be null or blank");
+            throw new BadRequestException("Address fields cannot be null or blank");
         }
 
         Seller seller = new Seller();
@@ -122,13 +122,13 @@ public class SellerService {
         );
 
         Seller seller = sellerRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
         if (!seller.isActive())
-            throw new CustomException("Account is not activated");
+            throw new BadRequestException("Account is not activated");
 
         if (seller.isLocked())
-            throw new CustomException("Account is locked");
+            throw new BadRequestException("Account is locked");
 
         if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
             seller.setInvalidAttemptCount(seller.getInvalidAttemptCount() + 1);
@@ -140,7 +140,7 @@ public class SellerService {
             }
 
             sellerRepository.save(seller);
-            throw new CustomException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         seller.setInvalidAttemptCount(0);
@@ -161,7 +161,7 @@ public class SellerService {
 
     public void logoutSeller(String request) {
         if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
+            throw new BadRequestException("Access token is missing or invalid format!");
         }
 
         String token = request.substring(7);
@@ -178,7 +178,7 @@ public class SellerService {
         List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
 
         if(!allowedSortFields.contains(sortBy)) {
-            throw new CustomException("Invalid Sort Type");
+            throw new BadRequestException("Invalid Sort Type");
         }
 
         Pageable pageable = PageRequest.of(pageOffset, pageSize, Sort.by(sortBy));
@@ -209,13 +209,13 @@ public class SellerService {
         Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
 
         if (sellerOptional.isEmpty()) {
-            throw new CustomException("Seller ID not found!");
+            throw new BadRequestException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
 
         if (seller.isActive()) {
-            throw new CustomException("Seller is already activated!");
+            throw new BadRequestException("Seller is already activated!");
         }
 
         seller.setActive(true);
@@ -233,13 +233,13 @@ public class SellerService {
         Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
 
         if (sellerOptional.isEmpty()) {
-            throw new CustomException("Seller ID not found!");
+            throw new BadRequestException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
 
         if (!seller.isActive()) {
-            throw new CustomException("Seller is already deActivated!");
+            throw new BadRequestException("Seller is already deActivated!");
         }
 
         seller.setActive(false);
@@ -257,13 +257,13 @@ public class SellerService {
         User user = SecurityUtil.getCurrentUser();
 
         if (!(user instanceof Seller)) {
-            throw new CustomException("Current user is not a seller!");
+            throw new BadRequestException("Current user is not a seller!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
 
         if (optionalSeller.isEmpty()) {
-            throw new CustomException("Seller not found!");
+            throw new BadRequestException("Seller not found!");
         }
 
         Seller seller = optionalSeller.get();

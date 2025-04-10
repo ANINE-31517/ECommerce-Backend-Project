@@ -3,7 +3,7 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.CO.AdminLoginCO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,10 @@ public class AdminService {
         );
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
         if (user.isLocked())
-            throw new CustomException("Account is locked");
+            throw new BadRequestException("Account is locked");
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             user.setInvalidAttemptCount(user.getInvalidAttemptCount() + 1);
@@ -52,7 +52,7 @@ public class AdminService {
             }
 
             userRepository.save(user);
-            throw new CustomException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         user.setInvalidAttemptCount(0);
@@ -73,7 +73,7 @@ public class AdminService {
 
     public void logoutAdmin(String request) {
         if (request == null || !request.startsWith("Bearer ")) {
-            throw new CustomException("Access token is missing or invalid format!");
+            throw new BadRequestException("Access token is missing or invalid format!");
         }
 
         String token = request.substring(7);

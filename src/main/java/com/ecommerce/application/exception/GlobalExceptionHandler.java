@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<String> handleCustomException(CustomException e) {
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<String> handleCustomException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 

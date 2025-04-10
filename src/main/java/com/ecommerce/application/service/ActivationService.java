@@ -2,7 +2,7 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.entity.ActivationToken;
 import com.ecommerce.application.entity.Customer;
-import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
@@ -30,14 +30,14 @@ public class ActivationService {
         Optional<ActivationToken> tokenOpt = tokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
-            throw new CustomException("Invalid activation token!");
+            throw new BadRequestException("Invalid activation token!");
         }
 
-        ActivationToken activationToken = tokenOpt.orElseThrow(() -> new CustomException("Token not found"));
+        ActivationToken activationToken = tokenOpt.orElseThrow(() -> new BadRequestException("Token not found"));
         Customer customer = activationToken.getCustomer();
 
         if(customer.isActive()) {
-            throw new CustomException("Account is already activated!");
+            throw new BadRequestException("Account is already activated!");
         }
 
         if (activationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
@@ -53,7 +53,7 @@ public class ActivationService {
             emailService.sendEmail(customer.getEmail(), "New Activation Link",
                     "Your activation link has expired. Use this new link: http://localhost:8080/api/customers/activate?token=" + newToken);
 
-            throw new CustomException("Activation token expired. A new activation email has been sent.");
+            throw new BadRequestException("Activation token expired. A new activation email has been sent.");
         }
 
         customer.setActive(true);
@@ -70,13 +70,13 @@ public class ActivationService {
     public void resendActivationLink(String email) {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
         if (customerOpt.isEmpty()) {
-            throw new CustomException("Email not found");
+            throw new BadRequestException("Email not found");
         }
 
-        Customer customer = customerOpt.orElseThrow(() -> new CustomException("Customer not found"));
+        Customer customer = customerOpt.orElseThrow(() -> new BadRequestException("Customer not found"));
 
         if (customer.isActive()) {
-            throw new CustomException("Account is already activated");
+            throw new BadRequestException("Account is already activated");
         }
 
         tokenRepository.deleteByCustomer(customer);
