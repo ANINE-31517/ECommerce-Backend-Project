@@ -2,17 +2,22 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
+import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.VO.UserActivatedDeActivateVO;
+import com.ecommerce.application.config.ImageStorageConfig;
+import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.constant.SellerConstant;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
+import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.CustomException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.SellerRepository;
+import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -27,6 +32,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -44,8 +52,11 @@ public class SellerService {
     private final JwtService jwtService;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
+    private final SecurityUtil securityUtil;
+    private final ImageStorageConfig imageStorageConfig;
 
     private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
+    private final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
     @Transactional
     public void registerSeller(SellerRegistrationCO request) {
@@ -241,5 +252,49 @@ public class SellerService {
                 .message("Seller account deActivated successfully!")
                 .build();
     }
+
+    public SellerProfileVO getSellerProfile() {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Seller)) {
+            throw new CustomException("Current user is not a seller!");
+        }
+
+        Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
+
+        if (optionalSeller.isEmpty()) {
+            throw new CustomException("Seller not found!");
+        }
+
+        Seller seller = optionalSeller.get();
+        return convertToSellerProfileVO(seller);
+
+    }
+
+    private SellerProfileVO convertToSellerProfileVO(Seller seller) {
+
+        String imageUrl = "Image not uploaded!";
+
+        for (String ext : allowedExtensions) {
+            Path path = Paths.get(imageStorageConfig.getBasePath(), "users", seller.getId().toString() + "." + ext);
+            if (Files.exists(path)) {
+                imageUrl = "http://localhost:8080/api/images/users/" + seller.getId();
+                break;
+            }
+        }
+
+        return SellerProfileVO.builder()
+                .id(seller.getId())
+                .firstName(seller.getFirstName())
+                .lastName(seller.getLastName())
+                .isActive(seller.isActive())
+                .companyName(seller.getCompanyName())
+                .companyContact(seller.getCompanyContact())
+                .gst(seller.getGst())
+                .image(imageUrl)
+                .address(seller.getAddresses().getFirst())
+                .build();
+    }
+
 }
 

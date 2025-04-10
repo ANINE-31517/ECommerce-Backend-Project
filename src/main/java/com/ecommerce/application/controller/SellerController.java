@@ -2,6 +2,7 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
+import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.SellerService;
 import com.ecommerce.application.service.TokenService;
@@ -37,5 +38,13 @@ public class SellerController {
         sellerService.logoutSeller(request);
         return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<SellerProfileVO> getSellerProfile() {
+        SellerProfileVO profile = sellerService.getSellerProfile();
+        return ResponseEntity.ok(profile);
+    }
+
 
 }

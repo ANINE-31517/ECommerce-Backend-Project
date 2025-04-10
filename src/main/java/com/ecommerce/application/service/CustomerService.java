@@ -50,8 +50,6 @@ public class CustomerService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
-    private static final List<String> ALLOWED_SORT_FIELDS = List.of("id", "fullName", "email", "createdAt");
-
     @Transactional
     public void registerCustomer(CustomerRegistrationCO request) {
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {

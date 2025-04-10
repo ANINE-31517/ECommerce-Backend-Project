@@ -1,0 +1,93 @@
+package com.ecommerce.application.service;
+
+import com.ecommerce.application.config.ImageStorageConfig;
+import com.ecommerce.application.constant.ImageConstant;
+import com.ecommerce.application.entity.User;
+import com.ecommerce.application.exception.CustomException;
+import com.ecommerce.application.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ImageService {
+
+    private final ImageStorageConfig imageStorageConfig;
+    private final UserRepository userRepository;
+
+    private final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
+
+
+    public void uploadUserImage(UUID userId, MultipartFile file) throws IOException {
+
+        Optional<User> userOpt = userRepository.findById(userId);
+
+        if(userOpt.isEmpty()) {
+            throw new CustomException("User Id not found!");
+        }
+
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename()).toLowerCase();
+
+        if (!allowedExtensions.contains(extension)) {
+            throw new CustomException("Only JPG, JPEG, PNG, BMP files are allowed!");
+        }
+
+        String filePath = getUserImagePath(userId, extension);
+
+        File destFile = new File(filePath);
+        destFile.getParentFile().mkdirs();
+        file.transferTo(destFile);
+    }
+
+    public ResponseEntity<Resource> getUserImage(UUID userId) throws IOException {
+
+        Optional<User> userOpt = userRepository.findById(userId);
+
+        if(userOpt.isEmpty()) {
+            throw new CustomException("User Id not found!");
+        }
+
+        Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "users");
+
+        for (String ext : allowedExtensions) {
+            Path path = directoryPath.resolve(userId.toString() + "." + ext);
+            if (Files.exists(path)) {
+                Resource resource = new UrlResource(path.toUri());
+                MediaType mediaType = getMediaType(ext);
+                return ResponseEntity.ok()
+                        .contentType(mediaType)
+                        .body(resource);
+            }
+        }
+        throw new FileNotFoundException("User image not found!");
+    }
+
+    private String getUserImagePath(UUID userId, String extension) {
+        return Paths.get(imageStorageConfig.getBasePath(), "users", userId.toString() + "." + extension).toString();
+    }
+
+    private MediaType getMediaType(String extension) {
+        return switch (extension) {
+            case "png" -> MediaType.IMAGE_PNG;
+            case "bmp" -> MediaType.valueOf("image/bmp");
+            default -> MediaType.IMAGE_JPEG;
+        };
+    }
+}
+

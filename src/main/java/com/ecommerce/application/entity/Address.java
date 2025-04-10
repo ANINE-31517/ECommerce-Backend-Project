@@ -27,7 +27,7 @@ public class Address {
     private String zipCode;
     private String label;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;
