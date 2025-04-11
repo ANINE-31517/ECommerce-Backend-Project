@@ -1,11 +1,9 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.SellerLoginCO;
+import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
-import com.ecommerce.application.VO.SellerProfileVO;
-import com.ecommerce.application.VO.SellerRegisteredVO;
-import com.ecommerce.application.VO.TokenResponseVO;
-import com.ecommerce.application.VO.UserActivatedDeActivateVO;
+import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.constant.SellerConstant;
@@ -177,7 +175,7 @@ public class SellerService {
 
         List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
 
-        if(!allowedSortFields.contains(sortBy)) {
+        if (!allowedSortFields.contains(sortBy)) {
             throw new BadRequestException("Invalid Sort Type");
         }
 
@@ -293,6 +291,64 @@ public class SellerService {
                 .gst(seller.getGst())
                 .image(imageUrl)
                 .address(seller.getAddresses().getFirst())
+                .build();
+    }
+
+    public ProfileUpdateVO updateProfile(SellerProfileUpdateCO sellerProfileUpdateCO) {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Seller)) {
+            throw new BadRequestException("Current user is not a seller!");
+        }
+
+        Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
+
+        if (optionalSeller.isEmpty()) {
+            throw new BadRequestException("Seller not found!");
+        }
+
+        Seller seller = optionalSeller.get();
+
+        if (!seller.isActive()) {
+            throw new BadRequestException("Account is not active. Cannot update profile.");
+        }
+        if (seller.isLocked()) {
+            throw new BadRequestException("Account is locked. Cannot update profile.");
+        }
+
+        boolean isUpdated = false;
+
+        if (sellerProfileUpdateCO.getFirstName() != null && !sellerProfileUpdateCO.getFirstName().isBlank()) {
+            seller.setFirstName(sellerProfileUpdateCO.getFirstName());
+            isUpdated = true;
+        }
+        if (sellerProfileUpdateCO.getLastName() != null && !sellerProfileUpdateCO.getLastName().isBlank()) {
+            seller.setLastName(sellerProfileUpdateCO.getLastName());
+            isUpdated = true;
+        }
+        if (sellerProfileUpdateCO.getCompanyName() != null && !sellerProfileUpdateCO.getCompanyName().isBlank()) {
+            boolean companyExists = sellerRepository.existsByCompanyName(sellerProfileUpdateCO.getCompanyName());
+
+            if (companyExists) {
+                throw new BadRequestException("Company name already exists! Please choose another one.");
+            }
+            seller.setCompanyName(sellerProfileUpdateCO.getCompanyName());
+            isUpdated = true;
+        }
+        if (sellerProfileUpdateCO.getCompanyContact() != null && !sellerProfileUpdateCO.getCompanyContact().isBlank()) {
+            seller.setCompanyContact(sellerProfileUpdateCO.getCompanyContact());
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
+            throw new BadRequestException("Changes are required to update the profile!");
+        }
+
+        sellerRepository.save(seller);
+
+        return ProfileUpdateVO.builder()
+                .success(true)
+                .message("Seller profile updated successfully!")
                 .build();
     }
 

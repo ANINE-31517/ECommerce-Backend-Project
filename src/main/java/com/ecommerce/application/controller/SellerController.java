@@ -1,7 +1,9 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.SellerLoginCO;
+import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
+import com.ecommerce.application.VO.ProfileUpdateVO;
 import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.SellerService;
@@ -46,5 +48,11 @@ public class SellerController {
         return ResponseEntity.ok(profile);
     }
 
+    @PatchMapping("/updateProfile")
+    @PreAuthorize("hasAnyAuthority('SELLER')")
+    public ResponseEntity<ProfileUpdateVO> updateProfile(@Valid @RequestBody SellerProfileUpdateCO sellerProfileUpdateCO) {
+        ProfileUpdateVO profileUpdateVO = sellerService.updateProfile(sellerProfileUpdateCO);
+        return ResponseEntity.ok(profileUpdateVO);
+    }
 
 }
