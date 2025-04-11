@@ -1,11 +1,13 @@
 package com.ecommerce.application.CO;
 
 import com.ecommerce.application.entity.Address;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 
 @Data
 public class SellerRegistrationCO {
@@ -27,7 +29,8 @@ public class SellerRegistrationCO {
     @NotBlank(message = "Company name is required")
     private String companyName;
 
-    private Address companyAddress;
+    @Valid
+    private AddressCO companyAddress;
 
     @NotBlank(message = "Company contact is required")
     @Pattern(regexp = "^[0-9]{10}$", message = "Company contact must be a 10-digit number")

@@ -1,5 +1,6 @@
 package com.ecommerce.application.service;
 
+import com.ecommerce.application.CO.AddressCO;
 import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
@@ -97,13 +98,23 @@ public class SellerService {
 
         seller.setRoles(new Role(RoleEnum.SELLER));
 
-        Address companyAddress = request.getCompanyAddress();
+        AddressCO addressCO = request.getCompanyAddress();
+
+        Address companyAddress = new Address();
+        companyAddress.setCity(addressCO.getCity());
+        companyAddress.setState(addressCO.getState());
+        companyAddress.setCountry(addressCO.getCountry());
+        companyAddress.setAddressLine(addressCO.getAddressLine());
+        companyAddress.setZipCode(addressCO.getZipCode());
+        companyAddress.setLabel(addressCO.getLabel());
+
         companyAddress.setUser(seller);
         seller.setAddresses(List.of(companyAddress));
 
         sellerRepository.save(seller);
 
         logger.info("Seller ID: {}", seller.getId());
+        logger.info("Seller address ID: {}", seller.getAddresses().getFirst().getId());
 
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
