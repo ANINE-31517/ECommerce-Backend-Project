@@ -1,7 +1,9 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CustomerLoginCO;
+import com.ecommerce.application.CO.CustomerProfileUpdateCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
+import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.CustomerConstant;
@@ -272,6 +274,55 @@ public class CustomerService {
                 .isActive(customer.isActive())
                 .image(imageUrl)
                 .contact(customer.getContact())
+                .build();
+    }
+
+    public ProfileUpdateVO updateProfile(CustomerProfileUpdateCO customerProfileUpdateCO) {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Customer)) {
+            throw new BadRequestException("Current user is not a seller!");
+        }
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(user.getId());
+
+        if (optionalCustomer.isEmpty()) {
+            throw new BadRequestException("Customer not found!");
+        }
+
+        Customer customer = optionalCustomer.get();
+
+        if (!customer.isActive()) {
+            throw new BadRequestException("Account is not active. Cannot update profile.");
+        }
+        if (customer.isLocked()) {
+            throw new BadRequestException("Account is locked. Cannot update profile.");
+        }
+
+        boolean isUpdated = false;
+
+        if (customerProfileUpdateCO.getFirstName() != null && !customerProfileUpdateCO.getFirstName().isBlank()) {
+            customer.setFirstName(customerProfileUpdateCO.getFirstName());
+            isUpdated = true;
+        }
+        if (customerProfileUpdateCO.getLastName() != null && !customerProfileUpdateCO.getLastName().isBlank()) {
+            customer.setLastName(customerProfileUpdateCO.getLastName());
+            isUpdated = true;
+        }
+        if (customerProfileUpdateCO.getContact() != null && !customerProfileUpdateCO.getContact().isBlank()) {
+            customer.setContact(customerProfileUpdateCO.getContact());
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
+            throw new BadRequestException("Changes are required to update the profile!");
+        }
+
+        customerRepository.save(customer);
+
+        return ProfileUpdateVO.builder()
+                .success(true)
+                .message("Customer profile updated successfully!")
                 .build();
     }
 }
