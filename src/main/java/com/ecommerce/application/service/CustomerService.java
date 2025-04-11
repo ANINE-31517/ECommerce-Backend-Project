@@ -3,7 +3,6 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerProfileUpdateCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
-import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.CustomerConstant;
