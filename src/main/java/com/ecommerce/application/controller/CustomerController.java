@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -75,6 +76,13 @@ public class CustomerController {
     public ResponseEntity<String> addAddress(@Valid @RequestBody AddressCO request) {
         customerService.addAddress(request);
         return ResponseEntity.ok("Address added successfully.");
+    }
+
+    @DeleteMapping("/deleteAddress/{addressId}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> deleteAddress(@PathVariable UUID addressId) {
+        customerService.deleteAddress(addressId);
+        return ResponseEntity.ok("Address deleted successfully.");
     }
 
 }

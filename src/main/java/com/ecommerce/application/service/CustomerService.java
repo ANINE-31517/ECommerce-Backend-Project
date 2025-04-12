@@ -11,6 +11,7 @@ import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.AddressRepository;
@@ -354,7 +355,29 @@ public class CustomerService {
         address.setUser(currentUser);
 
         addressRepository.save(address);
+
+        logger.info("Address ID: {}", address.getId());
     }
+
+    public void deleteAddress(UUID addressId) {
+        User currentUser = SecurityUtil.getCurrentUser();
+
+        List<Address> userAddresses = addressRepository.findAllByUserId(currentUser.getId());
+
+        if (userAddresses.size() <= 1) {
+            throw new BadRequestException("Cannot delete the default address.");
+        }
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found."));
+
+        if (!address.getUser().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("You are not allowed to delete this address.");
+        }
+
+        addressRepository.delete(address);
+    }
+
 
 }
 
