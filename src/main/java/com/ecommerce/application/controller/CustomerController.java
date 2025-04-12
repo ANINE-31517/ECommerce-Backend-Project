@@ -1,14 +1,9 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.CO.CustomerLoginCO;
-import com.ecommerce.application.CO.CustomerProfileUpdateCO;
-import com.ecommerce.application.CO.CustomerRegistrationCO;
-import com.ecommerce.application.CO.SellerProfileUpdateCO;
+import com.ecommerce.application.CO.*;
 import com.ecommerce.application.VO.CustomerProfileVO;
 import com.ecommerce.application.VO.ProfileUpdateVO;
-import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.VO.TokenResponseVO;
-import com.ecommerce.application.entity.Customer;
 import com.ecommerce.application.service.ActivationService;
 import com.ecommerce.application.service.CustomerService;
 import com.ecommerce.application.service.TokenService;
@@ -73,6 +68,13 @@ public class CustomerController {
     public ResponseEntity<ProfileUpdateVO> updateProfile(@Valid @RequestBody CustomerProfileUpdateCO customerProfileUpdateCO) {
         ProfileUpdateVO profileUpdateVO = customerService.updateProfile(customerProfileUpdateCO);
         return ResponseEntity.ok(profileUpdateVO);
+    }
+
+    @PostMapping("/addAddress")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> addAddress(@Valid @RequestBody AddressCO request) {
+        customerService.addAddress(request);
+        return ResponseEntity.ok("Address added successfully.");
     }
 
 }

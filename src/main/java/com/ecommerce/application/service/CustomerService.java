@@ -1,5 +1,6 @@
 package com.ecommerce.application.service;
 
+import com.ecommerce.application.CO.AddressCO;
 import com.ecommerce.application.CO.CustomerLoginCO;
 import com.ecommerce.application.CO.CustomerProfileUpdateCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
@@ -12,6 +13,7 @@ import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
+import com.ecommerce.application.repository.AddressRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
@@ -48,6 +50,7 @@ public class CustomerService {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final ImageStorageConfig imageStorageConfig;
+    private final AddressRepository addressRepository;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
@@ -324,5 +327,34 @@ public class CustomerService {
                 .message("Customer profile updated successfully!")
                 .build();
     }
+
+    public void addAddress(AddressCO request) {
+        User currentUser = SecurityUtil.getCurrentUser();
+
+        boolean addressExists = addressRepository.existsByUserIdAndCityIgnoreCaseAndStateIgnoreCaseAndCountryIgnoreCaseAndAddressLineIgnoreCaseAndZipCode(
+                currentUser.getId(),
+                request.getCity(),
+                request.getState(),
+                request.getCountry(),
+                request.getAddressLine(),
+                request.getZipCode()
+        );
+
+        if (addressExists) {
+            throw new BadRequestException("Address already exists.");
+        }
+
+        Address address = new Address();
+        address.setAddressLine(request.getAddressLine());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setCountry(request.getCountry());
+        address.setZipCode(request.getZipCode());
+        address.setLabel(request.getLabel());
+        address.setUser(currentUser);
+
+        addressRepository.save(address);
+    }
+
 }
 
