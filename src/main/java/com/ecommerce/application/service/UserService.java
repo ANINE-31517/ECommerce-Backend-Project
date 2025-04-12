@@ -2,6 +2,7 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.AddressUpdateCO;
 import com.ecommerce.application.CO.UpdatePasswordCO;
+import com.ecommerce.application.VO.AddressVO;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
@@ -15,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,5 +80,27 @@ public class UserService {
 
         addressRepository.save(address);
     }
+
+    public List<AddressVO> getAddresses() {
+        User currentUser = SecurityUtil.getCurrentUser();
+
+        List<Address> addresses = addressRepository.findAllByUserId(currentUser.getId());
+
+        return addresses.stream()
+                .map(this::convertToAddressVO)
+                .collect(Collectors.toList());
+    }
+
+    public AddressVO convertToAddressVO(Address address) {
+        return AddressVO.builder()
+                .city(address.getCity())
+                .state(address.getState())
+                .country(address.getCountry())
+                .addressLine(address.getAddressLine())
+                .zipCode(address.getZipCode())
+                .label(address.getLabel())
+                .build();
+    }
+
 
 }

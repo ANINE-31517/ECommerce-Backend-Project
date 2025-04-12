@@ -2,12 +2,15 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AddressUpdateCO;
 import com.ecommerce.application.CO.UpdatePasswordCO;
+import com.ecommerce.application.VO.AddressVO;
 import com.ecommerce.application.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -28,6 +31,13 @@ public class UserController {
     public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressUpdateCO request) {
         userService.updateAddress(request);
         return ResponseEntity.ok("Address has been updated successfully.");
+    }
+
+    @GetMapping("/getAddress")
+    @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER')")
+    public ResponseEntity<List<AddressVO>> getAddresses() {
+        List<AddressVO> addresses = userService.getAddresses();
+        return ResponseEntity.ok(addresses);
     }
 
 }
