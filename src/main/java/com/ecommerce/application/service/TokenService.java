@@ -19,7 +19,6 @@ public class TokenService {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
     private final TokenRepository tokenRepository;
 
     public void saveTokenPair(User user, String accessToken, String refreshToken) {

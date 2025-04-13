@@ -14,13 +14,13 @@ public class ResetPasswordController {
 
     private final PasswordResetService passwordResetService;
 
-    @PostMapping("/forgot-password")
+    @PostMapping("/forgotPassword")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordCO request) {
         passwordResetService.forgotPassword(request);
         return ResponseEntity.ok("Password reset email sent.");
     }
 
-    @PutMapping("/reset-password")
+    @PutMapping("/resetPassword")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordCO request) {
         passwordResetService.resetPassword(request);
         return ResponseEntity.ok("Password has been successfully reset.");

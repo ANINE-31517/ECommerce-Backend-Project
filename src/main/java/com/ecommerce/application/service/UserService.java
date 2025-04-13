@@ -2,7 +2,9 @@ package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.AddressUpdateCO;
 import com.ecommerce.application.CO.UpdatePasswordCO;
+import com.ecommerce.application.CO.UserLoginCO;
 import com.ecommerce.application.VO.AddressVO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
@@ -13,6 +15,10 @@ import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +34,12 @@ public class UserService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
+    private final TokenService tokenService;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
 
     @Transactional
     public void updatePassword(UpdatePasswordCO request) {
@@ -102,5 +114,69 @@ public class UserService {
                 .build();
     }
 
+    public TokenResponseVO loginUser(UserLoginCO request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+
+        if (user.isLocked())
+            throw new BadRequestException("Account is locked");
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            user.setInvalidAttemptCount(user.getInvalidAttemptCount() + 1);
+
+            if (user.getInvalidAttemptCount() >= 3) {
+                user.setLocked(true);
+                emailService.sendEmail(user.getEmail(), "Account Locked",
+                        "Your account is locked due to 3 failed login attempts.");
+            }
+            userRepository.save(user);
+            throw new BadRequestException("Invalid credentials");
+        }
+
+        user.setInvalidAttemptCount(0);
+        userRepository.save(user);
+
+        String roleName = user.getRoles().getAuthority();
+
+        if ((roleName.equalsIgnoreCase("CUSTOMER") || roleName.equalsIgnoreCase("SELLER")) && !user.isActive()) {
+            throw new BadRequestException("Account is not activated");
+        }
+
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        tokenService.saveTokenPair(user, accessToken, refreshToken);
+
+        logger.info("Login Successful! \n User: {} \n Role: {} \n AccessToken: {} \n RefreshToken: {}",
+                user.getEmail(),
+                roleName,
+                accessToken,
+                refreshToken);
+
+        return TokenResponseVO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+
+    public void logoutUser(String request) {
+
+        if (request == null || !request.startsWith("Bearer ")) {
+            throw new BadRequestException("Access token is missing or invalid format!");
+        }
+
+        String token = request.substring(7);
+
+        if (!tokenService.isAccessTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired access token!");
+        }
+
+        tokenService.invalidateToken(token);
+    }
 
 }

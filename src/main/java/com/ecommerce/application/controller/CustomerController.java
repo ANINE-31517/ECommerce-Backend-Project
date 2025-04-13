@@ -3,10 +3,8 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.*;
 import com.ecommerce.application.VO.CustomerProfileVO;
 import com.ecommerce.application.VO.ProfileUpdateVO;
-import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.ActivationService;
 import com.ecommerce.application.service.CustomerService;
-import com.ecommerce.application.service.TokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,6 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ActivationService activationService;
-    private final TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationCO request) {
@@ -37,25 +34,25 @@ public class CustomerController {
         return ResponseEntity.ok("Account activated successfully");
     }
 
-    @PostMapping("/resend-activation-link")
+    @PostMapping("/resendActivationLink")
     public ResponseEntity<String> resendActivationLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         activationService.resendActivationLink(email);
         return ResponseEntity.ok("A new activation link has been sent to your email.");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<TokenResponseVO> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
-        TokenResponseVO responseVO = customerService.loginCustomer(request);
-        return ResponseEntity.ok(responseVO);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<TokenResponseVO> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
+//        TokenResponseVO responseVO = customerService.loginCustomer(request);
+//        return ResponseEntity.ok(responseVO);
+//    }
 
-    @PostMapping("/logout")
-    @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
-        customerService.logoutCustomer(request);
-        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
-    }
+//    @PostMapping("/logout")
+//    @PreAuthorize("hasAuthority('CUSTOMER')")
+//    public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
+//        customerService.logoutCustomer(request);
+//        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
+//    }
 
     @GetMapping("/profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")

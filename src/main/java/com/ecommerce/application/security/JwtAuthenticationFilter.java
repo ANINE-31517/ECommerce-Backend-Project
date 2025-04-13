@@ -1,6 +1,7 @@
 package com.ecommerce.application.security;
 
 import com.ecommerce.application.service.JwtService;
+import com.ecommerce.application.service.TokenService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
     private static final List<String> publicUrls = List.of(
             "/api/reset/forgot-password",
@@ -35,8 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/sellers/login",
             "/api/sellers/register",
             "/api/admin/login",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
+            "/api/user/login",
+            "/swagger-ui",
+            "/v3/api-docs",
             "/swagger-ui.html",
             "/api/token/refresh"
     );
@@ -61,9 +64,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = authHeader.substring(7);
 
         if (!jwtService.validateAccessToken(jwt)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid token type\"}");
+            sendUnauthorizedResponse(response, "Invalid or expired token");
+            return;
+        }
+
+        if (!tokenService.isAccessTokenValid(jwt)) {
+            sendUnauthorizedResponse(response, "Access token has been invalidated. Please login again.");
             return;
         }
 
@@ -86,10 +92,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch(JwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+            sendUnauthorizedResponse(response, "Invalid or expired token");
         }
+    }
+
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
 

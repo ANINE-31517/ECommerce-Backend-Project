@@ -2,7 +2,9 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.AddressUpdateCO;
 import com.ecommerce.application.CO.UpdatePasswordCO;
+import com.ecommerce.application.CO.UserLoginCO;
 import com.ecommerce.application.VO.AddressVO;
+import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,19 @@ public class UserController {
     public ResponseEntity<List<AddressVO>> getAddresses() {
         List<AddressVO> addresses = userService.getAddresses();
         return ResponseEntity.ok(addresses);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponseVO> loginCustomer(@Valid @RequestBody UserLoginCO request) {
+        TokenResponseVO responseVO = userService.loginUser(request);
+        return ResponseEntity.ok(responseVO);
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER') or hasAuthority('ADMIN')")
+    public ResponseEntity<String> logoutUser(@RequestHeader("Authorization") String request) {
+        userService.logoutUser(request);
+        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
     }
 
 }

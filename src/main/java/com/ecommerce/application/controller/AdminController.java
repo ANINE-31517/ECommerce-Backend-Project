@@ -1,14 +1,11 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.CO.AdminLoginCO;
 import com.ecommerce.application.VO.UserActivatedDeActivateVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
-import com.ecommerce.application.VO.TokenResponseVO;
 import com.ecommerce.application.service.AdminService;
 import com.ecommerce.application.service.CustomerService;
 import com.ecommerce.application.service.SellerService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +23,18 @@ public class AdminController {
     private final CustomerService customerService;
     private final SellerService sellerService;
 
-    @PostMapping("/login")
-    public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
-        TokenResponseVO responseVO = adminService.loginAdmin(request);
-        return ResponseEntity.ok(responseVO);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
+//        TokenResponseVO responseVO = adminService.loginAdmin(request);
+//        return ResponseEntity.ok(responseVO);
+//    }
 
-    @PostMapping("/logout")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<String> logoutSeller(@RequestHeader("Authorization") String request) {
-        adminService.logoutAdmin(request);
-        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
-    }
+//    @PostMapping("/logout")
+//    @PreAuthorize("hasAuthority('ADMIN')")
+//    public ResponseEntity<String> logoutAdmin(@RequestHeader("Authorization") String request) {
+//        adminService.logoutAdmin(request);
+//        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
+//    }
 
 
     @GetMapping("/getCustomer")

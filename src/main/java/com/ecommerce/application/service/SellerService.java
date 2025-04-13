@@ -1,7 +1,6 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.AddressCO;
-import com.ecommerce.application.CO.SellerLoginCO;
 import com.ecommerce.application.CO.SellerProfileUpdateCO;
 import com.ecommerce.application.CO.SellerRegistrationCO;
 import com.ecommerce.application.VO.*;
@@ -14,7 +13,6 @@ import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.BadRequestException;
-import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.SellerRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
@@ -26,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -121,66 +118,66 @@ public class SellerService {
 
     }
 
-    public TokenResponseVO loginSeller(SellerLoginCO request) {
+//    public TokenResponseVO loginSeller(SellerLoginCO request) {
+//
+//        authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        request.getEmail(),
+//                        request.getPassword()
+//                )
+//        );
+//
+//        Seller seller = sellerRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+//
+//        if (!seller.isActive())
+//            throw new BadRequestException("Account is not activated");
+//
+//        if (seller.isLocked())
+//            throw new BadRequestException("Account is locked");
+//
+//        if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
+//            seller.setInvalidAttemptCount(seller.getInvalidAttemptCount() + 1);
+//
+//            if (seller.getInvalidAttemptCount() >= 3) {
+//                seller.setLocked(true);
+//                emailService.sendEmail(seller.getEmail(), "Account Locked",
+//                        "Your account is locked due to 3 failed login attempts.");
+//            }
+//
+//            sellerRepository.save(seller);
+//            throw new BadRequestException("Invalid credentials");
+//        }
+//
+//        seller.setInvalidAttemptCount(0);
+//        sellerRepository.save(seller);
+//
+//        String accessToken = jwtService.generateAccessToken(seller);
+//        String refreshToken = jwtService.generateRefreshToken(seller);
+//        logger.info("accessToken {}", accessToken);
+//        logger.info("refreshToken {}", refreshToken);
+//
+//        tokenService.saveTokenPair(seller, accessToken, refreshToken);
+//
+//        return TokenResponseVO.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//    }
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-
-        Seller seller = sellerRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
-
-        if (!seller.isActive())
-            throw new BadRequestException("Account is not activated");
-
-        if (seller.isLocked())
-            throw new BadRequestException("Account is locked");
-
-        if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
-            seller.setInvalidAttemptCount(seller.getInvalidAttemptCount() + 1);
-
-            if (seller.getInvalidAttemptCount() >= 3) {
-                seller.setLocked(true);
-                emailService.sendEmail(seller.getEmail(), "Account Locked",
-                        "Your account is locked due to 3 failed login attempts.");
-            }
-
-            sellerRepository.save(seller);
-            throw new BadRequestException("Invalid credentials");
-        }
-
-        seller.setInvalidAttemptCount(0);
-        sellerRepository.save(seller);
-
-        String accessToken = jwtService.generateAccessToken(seller);
-        String refreshToken = jwtService.generateRefreshToken(seller);
-        logger.info("accessToken {}", accessToken);
-        logger.info("refreshToken {}", refreshToken);
-
-        tokenService.saveTokenPair(seller, accessToken, refreshToken);
-
-        return TokenResponseVO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
-
-    public void logoutSeller(String request) {
-        if (request == null || !request.startsWith("Bearer ")) {
-            throw new BadRequestException("Access token is missing or invalid format!");
-        }
-
-        String token = request.substring(7);
-
-        if (!tokenService.isAccessTokenValid(token)) {
-            throw new UnauthorizedException("Invalid or expired access token!");
-        }
-
-        tokenService.invalidateToken(token);
-    }
+//    public void logoutSeller(String request) {
+//        if (request == null || !request.startsWith("Bearer ")) {
+//            throw new BadRequestException("Access token is missing or invalid format!");
+//        }
+//
+//        String token = request.substring(7);
+//
+//        if (!tokenService.isAccessTokenValid(token)) {
+//            throw new UnauthorizedException("Invalid or expired access token!");
+//        }
+//
+//        tokenService.invalidateToken(token);
+//    }
 
     public Page<SellerRegisteredVO> getAllSellers(int pageOffset, int pageSize, String sortBy, String email) {
 
