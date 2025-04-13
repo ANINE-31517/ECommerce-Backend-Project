@@ -3,7 +3,6 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.VO.UserActivatedDeActivateVO;
 import com.ecommerce.application.VO.CustomerRegisteredVO;
 import com.ecommerce.application.VO.SellerRegisteredVO;
-import com.ecommerce.application.service.AdminService;
 import com.ecommerce.application.service.CustomerService;
 import com.ecommerce.application.service.SellerService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final AdminService adminService;
     private final CustomerService customerService;
     private final SellerService sellerService;
 
