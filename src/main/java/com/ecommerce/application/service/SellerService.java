@@ -14,6 +14,7 @@ import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.SellerRepository;
+import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -45,11 +46,8 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final TokenService tokenService;
-    private final AuthenticationManager authenticationManager;
-    private final SecurityUtil securityUtil;
     private final ImageStorageConfig imageStorageConfig;
+    private final UserRepository userRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
@@ -57,7 +55,7 @@ public class SellerService {
     @Transactional
     public void registerSeller(SellerRegistrationCO request) {
 
-        if (sellerRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BadRequestException("Email already exists");
         }
 

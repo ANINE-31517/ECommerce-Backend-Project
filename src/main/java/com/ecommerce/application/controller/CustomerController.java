@@ -7,6 +7,8 @@ import com.ecommerce.application.service.ActivationService;
 import com.ecommerce.application.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,24 +23,28 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ActivationService activationService;
+    private final MessageSource messageSource;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@Valid @RequestBody CustomerRegistrationCO request) {
         customerService.registerCustomer(request);
-        return ResponseEntity.ok("Customer registered successfully. Please check your email for activation.");
+        String message = messageSource.getMessage("customer.register.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping("/activate")
     public ResponseEntity<String> activateCustomer(@RequestParam("token") String token) {
         activationService.activateCustomer(token);
-        return ResponseEntity.ok("Account activated successfully");
+        String message = messageSource.getMessage("customer.activate.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
     @PostMapping("/resendActivationLink")
     public ResponseEntity<String> resendActivationLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         activationService.resendActivationLink(email);
-        return ResponseEntity.ok("A new activation link has been sent to your email.");
+        String message = messageSource.getMessage("customer.resend.activate.link.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
 //    @PostMapping("/login")
@@ -72,14 +78,16 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> addAddress(@Valid @RequestBody AddressCO request) {
         customerService.addAddress(request);
-        return ResponseEntity.ok("Address added successfully.");
+        String message = messageSource.getMessage("customer.add.address.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
     @DeleteMapping("/deleteAddress/{addressId}")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> deleteAddress(@PathVariable UUID addressId) {
         customerService.deleteAddress(addressId);
-        return ResponseEntity.ok("Address deleted successfully.");
+        String message = messageSource.getMessage("customer.delete.address.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
 }

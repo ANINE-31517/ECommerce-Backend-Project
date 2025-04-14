@@ -45,6 +45,11 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<Object> handleInternalServerException(InternalServerException ex, HttpServletRequest request) {
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI());
+    }
+
     private ResponseEntity<Object> buildResponseEntity(HttpStatus status, String message, String path) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

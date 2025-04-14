@@ -7,6 +7,8 @@ import com.ecommerce.application.VO.SellerProfileVO;
 import com.ecommerce.application.service.SellerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +19,13 @@ import org.springframework.web.bind.annotation.*;
 public class SellerController {
 
     private final SellerService sellerService;
+    private final MessageSource messageSource;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerCustomer(@Valid @RequestBody SellerRegistrationCO request) {
+    public ResponseEntity<String> registerSeller(@Valid @RequestBody SellerRegistrationCO request) {
         sellerService.registerSeller(request);
-        return ResponseEntity.ok("Seller registered successfully.");
+        String message = messageSource.getMessage("seller.register.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
 //    @PostMapping("/login")

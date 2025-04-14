@@ -15,6 +15,7 @@ import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.AddressRepository;
 import com.ecommerce.application.repository.CustomerRepository;
+import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -45,11 +46,9 @@ public class CustomerService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final ActivationTokenRepository activationTokenRepository;
-    private final JwtService jwtService;
-    private final TokenService tokenService;
-    private final AuthenticationManager authenticationManager;
     private final ImageStorageConfig imageStorageConfig;
     private final AddressRepository addressRepository;
+    private final UserRepository userRepository;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
@@ -60,7 +59,7 @@ public class CustomerService {
 
     @Transactional
     public void registerCustomer(CustomerRegistrationCO request) {
-        if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BadRequestException("Email already exists");
         }
 

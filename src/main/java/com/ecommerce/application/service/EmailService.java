@@ -1,6 +1,7 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.InternalServerException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class EmailService {
             helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new BadRequestException("Failed to send email");
+            throw new InternalServerException("Failed to send email");
         }
     }
 }
