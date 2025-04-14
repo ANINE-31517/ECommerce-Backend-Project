@@ -15,8 +15,7 @@ import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,10 +23,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -37,8 +36,6 @@ public class UserService {
     private final TokenService tokenService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 
     @Transactional
@@ -59,6 +56,8 @@ public class UserService {
 
         emailService.sendEmail(user.getEmail(), "Password has been Updated",
                 "Your account password has been successfully updated!");
+
+        log.info("User : {} \n Message : Your account password has been successfully updated!", user.getEmail());
     }
 
     public void updateAddress(AddressUpdateCO request) {
@@ -91,6 +90,8 @@ public class UserService {
         }
 
         addressRepository.save(address);
+
+        log.info("User : {} \n Message : Your address has been successfully updated!", currentUser.getEmail());
     }
 
     public List<AddressVO> getAddresses() {
@@ -100,7 +101,7 @@ public class UserService {
 
         return addresses.stream()
                 .map(this::convertToAddressVO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public AddressVO convertToAddressVO(Address address) {
@@ -122,17 +123,21 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        if (user.isLocked())
-            throw new BadRequestException("Account is locked");
+        if (user.isLocked()) {
+            log.info("User Account with email: {} is locked!", user.getEmail());
+            throw new UnauthorizedException("Account is locked");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             user.setInvalidAttemptCount(user.getInvalidAttemptCount() + 1);
 
             if (user.getInvalidAttemptCount() >= 3) {
                 user.setLocked(true);
+                log.info("User Account with email: {} has been locked!", user.getEmail());
                 emailService.sendEmail(user.getEmail(), "Account Locked",
                         "Your account is locked due to 3 failed login attempts.");
             }
+
             userRepository.save(user);
             throw new BadRequestException("Invalid credentials");
         }
@@ -143,6 +148,7 @@ public class UserService {
         String roleName = user.getRoles().getAuthority();
 
         if ((roleName.equalsIgnoreCase("CUSTOMER") || roleName.equalsIgnoreCase("SELLER")) && !user.isActive()) {
+            log.info("User Account with email: {} is not activated!", user.getEmail());
             throw new BadRequestException("Account is not activated");
         }
 
@@ -151,7 +157,7 @@ public class UserService {
 
         tokenService.saveTokenPair(user, accessToken, refreshToken);
 
-        logger.info("Login Successful! \n User: {} \n Role: {} \n AccessToken: {} \n RefreshToken: {}",
+        log.info("Login Successful! \n User: {} \n Role: {} \n AccessToken: {} \n RefreshToken: {}",
                 user.getEmail(),
                 roleName,
                 accessToken,
@@ -176,6 +182,7 @@ public class UserService {
             throw new UnauthorizedException("Invalid or expired access token!");
         }
 
+        log.info("User Account with token: {} has been locked!", token);
         tokenService.invalidateToken(token);
     }
 

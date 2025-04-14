@@ -7,6 +7,7 @@ import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-
+@Slf4j
 public class ActivationService {
 
     private final ActivationTokenRepository tokenRepository;
@@ -37,6 +38,7 @@ public class ActivationService {
         Customer customer = activationToken.getCustomer();
 
         if(customer.isActive()) {
+            log.error("Customer with email {} is already active.", customer.getEmail());
             throw new BadRequestException("Account is already activated!");
         }
 
@@ -53,6 +55,8 @@ public class ActivationService {
             emailService.sendEmail(customer.getEmail(), "New Activation Link",
                     "Your activation link has expired. Use this new link: http://localhost:8080/api/customers/activate?token=" + newToken);
 
+            log.info("New activation token has been sent to email: {}", customer.getEmail());
+
             throw new BadRequestException("Activation token expired. A new activation email has been sent.");
         }
 
@@ -60,6 +64,8 @@ public class ActivationService {
         customerRepository.save(customer);
 
         tokenRepository.delete(activationToken);
+
+        log.info("Customer account activated successfully for email: {}", customer.getEmail());
 
         emailService.sendEmail(customer.getEmail(), "Account Activated",
                 "Your account has been successfully activated!");
@@ -69,6 +75,7 @@ public class ActivationService {
     @Transactional
     public void resendActivationLink(String email) {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
+
         if (customerOpt.isEmpty()) {
             throw new BadRequestException("Email not found");
         }
@@ -92,6 +99,8 @@ public class ActivationService {
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + newToken;
         emailService.sendEmail(customer.getEmail(), "Resend Activation Link",
                 "Click the link to activate your account: <a href='" + activationLink + "'>Activate</a>");
+
+        log.info("A new activation link has been sent to email: {}", customer.getEmail());
     }
 }
 

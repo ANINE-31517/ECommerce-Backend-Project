@@ -9,6 +9,7 @@ import com.ecommerce.application.repository.PasswordResetTokenRepository;
 import com.ecommerce.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +21,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PasswordResetService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-
-    private static final Logger logger = LoggerFactory.getLogger(PasswordResetService.class);
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -54,7 +54,7 @@ public class PasswordResetService {
         tokenRepository.save(resetToken);
 
         String resetLink = "http://localhost:8080/api/reset/forgot-password?token=" + token;
-        logger.info("Reset Token: {}", token);
+        log.info("Reset Token: {}", token);
 
         emailService.sendEmail(user.getEmail(), "Reset Password", "Click the link to reset your password: <a href='" + resetLink + "'>Reset</a>");
 
@@ -86,7 +86,7 @@ public class PasswordResetService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-
+        log.info("password has been successfully reset for user with email: {} ", user.getEmail());
         tokenRepository.deleteByUser(user);
     }
 }

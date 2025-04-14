@@ -33,6 +33,7 @@ public class UserController {
     }
 
     @PatchMapping("/addressUpdate")
+    //@PreAuthorize("(hasAuthority('CUSTOMER') or hasAuthority('SELLER')) and @securityService.isValidUser(request.id, authentication)")
     @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER')")
     public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressUpdateCO request) {
         userService.updateAddress(request);

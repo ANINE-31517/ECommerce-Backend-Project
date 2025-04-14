@@ -9,12 +9,14 @@ import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.TokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenService {
 
     private final JwtService jwtService;
@@ -30,6 +32,7 @@ public class TokenService {
                 .refreshTokenInvalidated(false)
                 .build();
         tokenRepository.save(token);
+        log.info("Token pair saved successfully for user: {}", user.getEmail());
     }
 
 
@@ -57,6 +60,7 @@ public class TokenService {
         token.setRefreshTokenInvalidated(true);
 
         tokenRepository.save(token);
+        log.info("Access Token: {} and Refresh Token: {} have successfully invalidated!", token.getAccessToken(), token.getRefreshToken());
     }
 
     @Transactional
@@ -87,7 +91,9 @@ public class TokenService {
                 .accessTokenInvalidated(false)
                 .refreshTokenInvalidated(false)
                 .build();
+
         tokenRepository.save(newToken);
+        log.info("New Access Token: {} and New Refresh Token: {} have successfully generated!", newAccessToken, newRefreshToken);
 
         return NewAccessTokenVO.builder()
                 .newAccessToken(newAccessToken)

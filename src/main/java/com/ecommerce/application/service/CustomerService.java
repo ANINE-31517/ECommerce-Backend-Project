@@ -19,12 +19,12 @@ import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +35,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -51,8 +50,6 @@ public class CustomerService {
     private final UserRepository userRepository;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
-    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
-
 
     @Value("${token.time}")
     private Integer tokenTime;
@@ -75,13 +72,11 @@ public class CustomerService {
         customer.setActive(false);
         customer.setContact(request.getContact());
         customer.setCreatedAt(LocalDateTime.now());
-
         customer.setRoles(new Role(RoleEnum.CUSTOMER));
 
         customerRepository.save(customer);
 
         String activationTokenString = UUID.randomUUID().toString();
-
         ActivationToken activationToken = new ActivationToken();
         activationToken.setToken(activationTokenString);
         activationToken.setCustomer(customer);
@@ -89,13 +84,17 @@ public class CustomerService {
 
         activationTokenRepository.save(activationToken);
 
-        logger.info("Customer ID: {}", customer.getId());
+        log.info("Customer ID: {}", customer.getId());
 
         String activationLink = "http://localhost:8080/api/customers/activate?token=" + activationTokenString;
-        logger.info("Activation Link: {}", activationLink);
+        log.info("Activation Link: {}", activationLink);
+
         emailService.sendEmail(request.getEmail(), "Activate Your Account",
                 "Click the link to activate: <a href='" + activationLink + "'>Activate</a>");
 
+        log.info("Registration Successful! \n User: {} \n Role: {}",
+                customer.getEmail(),
+                customer.getRoles().getAuthority());
     }
 
 //    public TokenResponseVO loginCustomer(CustomerLoginCO request) {
@@ -161,6 +160,7 @@ public class CustomerService {
 //    }
 
     public Page<CustomerRegisteredVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
+        log.info("Fetching customers - pageOffset: {}, pageSize: {}, sortBy: {}, emailFilter: {}", pageOffset, pageSize, sortBy, email);
 
         List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
 
@@ -176,8 +176,9 @@ public class CustomerService {
         } else {
             customers = customerRepository.findAll(pageable);
         }
+        log.info("Total customers fetched: {}", customers.getTotalElements());
 
-        return customers.map(customer -> convertToCustomerRegisteredVO(customer));
+        return customers.map(this::convertToCustomerRegisteredVO);
     }
 
     private CustomerRegisteredVO convertToCustomerRegisteredVO(Customer customer) {
@@ -207,6 +208,8 @@ public class CustomerService {
 
         emailService.sendEmail(customer.getEmail(), "Account Activated",
                 "Your account has been successfully activated!");
+        log.info("Customer with email: {} has been successfully activated!", customer.getEmail());
+
         return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Customer account activated successfully!")
@@ -231,6 +234,8 @@ public class CustomerService {
 
         emailService.sendEmail(customer.getEmail(), "Account deActivated",
                 "Your account has been successfully deActivated!");
+        log.info("Customer with email: {} has been successfully deActivated!", customer.getEmail());
+
         return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Customer account deActivated successfully!")
@@ -315,10 +320,12 @@ public class CustomerService {
         }
 
         if (!isUpdated) {
+            log.error("At least one field is required to be changed for updating the profile!");
             throw new BadRequestException("Changes are required to update the profile!");
         }
 
         customerRepository.save(customer);
+        log.info("Customer profile with email: {} has been successfully updated!", customer.getEmail());
 
         return ProfileUpdateVO.builder()
                 .success(true)
@@ -353,7 +360,8 @@ public class CustomerService {
 
         addressRepository.save(address);
 
-        logger.info("Address ID: {}", address.getId());
+        log.info("Address ID: {}", address.getId());
+        log.info("A new address is added for email: {}", currentUser.getEmail());
     }
 
     public void deleteAddress(UUID addressId) {
@@ -373,6 +381,7 @@ public class CustomerService {
         }
 
         addressRepository.delete(address);
+        log.info("Address with ID: {} has been deleted successfully!", addressId);
     }
 
 

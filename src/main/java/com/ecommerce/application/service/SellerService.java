@@ -18,13 +18,11 @@ import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +39,7 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SellerService {
 
     private final SellerRepository sellerRepository;
@@ -49,7 +48,6 @@ public class SellerService {
     private final ImageStorageConfig imageStorageConfig;
     private final UserRepository userRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
     @Transactional
@@ -77,6 +75,7 @@ public class SellerService {
                 isBlank(request.getCompanyAddress().getAddressLine()) ||
                 request.getCompanyAddress().getZipCode() == null ||
                 isBlank(request.getCompanyAddress().getLabel())) {
+            log.info("Valid address is required with not null fields!");
             throw new BadRequestException("Address fields cannot be null or blank");
         }
 
@@ -108,12 +107,15 @@ public class SellerService {
 
         sellerRepository.save(seller);
 
-        logger.info("Seller ID: {}", seller.getId());
-        logger.info("Seller address ID: {}", seller.getAddresses().getFirst().getId());
+        log.info("Seller ID: {}", seller.getId());
+        log.info("Seller address ID: {}", seller.getAddresses().getFirst().getId());
 
         emailService.sendEmail(request.getEmail(), "Seller Account Created",
                 "Your seller account has been created and is awaiting approval.");
 
+        log.info("Registration Successful! \n User: {} \n Role: {}",
+                seller.getEmail(),
+                seller.getRoles().getAuthority());
     }
 
 //    public TokenResponseVO loginSeller(SellerLoginCO request) {
@@ -178,6 +180,7 @@ public class SellerService {
 //    }
 
     public Page<SellerRegisteredVO> getAllSellers(int pageOffset, int pageSize, String sortBy, String email) {
+        log.info("Fetching sellers - pageOffset: {}, pageSize: {}, sortBy: {}, emailFilter: {}", pageOffset, pageSize, sortBy, email);
 
         List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
 
@@ -193,6 +196,7 @@ public class SellerService {
         } else {
             sellers = sellerRepository.findAll(pageable);
         }
+        log.info("Total sellers fetched: {}", sellers.getTotalElements());
 
         return sellers.map(this::convertToSellerRegisteredVO);
     }
@@ -227,6 +231,8 @@ public class SellerService {
 
         emailService.sendEmail(seller.getEmail(), "Account Activated",
                 "Your account has been successfully activated!");
+        log.info("Seller with email: {} has been successfully activated!", seller.getEmail());
+
         return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Seller account activated successfully!")
@@ -251,6 +257,8 @@ public class SellerService {
 
         emailService.sendEmail(seller.getEmail(), "Account deActivated",
                 "Your account has been successfully deActivated!");
+        log.info("Seller with email: {} has been successfully deActivated!", seller.getEmail());
+
         return UserActivatedDeActivateVO.builder()
                 .isActivated(true)
                 .message("Seller account deActivated successfully!")
@@ -347,10 +355,12 @@ public class SellerService {
         }
 
         if (!isUpdated) {
+            log.error("At least one field is required to be changed for updating the profile!");
             throw new BadRequestException("Changes are required to update the profile!");
         }
 
         sellerRepository.save(seller);
+        log.info("Seller profile with email: {} has been successfully updated!", seller.getEmail());
 
         return ProfileUpdateVO.builder()
                 .success(true)

@@ -6,6 +6,7 @@ import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +27,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageService {
 
     private final ImageStorageConfig imageStorageConfig;
     private final UserRepository userRepository;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
-
 
     public void uploadUserImage(UUID userId, MultipartFile file) throws IOException {
 
@@ -53,6 +54,8 @@ public class ImageService {
         File destFile = new File(filePath);
         destFile.getParentFile().mkdirs();
         file.transferTo(destFile);
+
+        log.info("Image successfully uploaded for userId: {}", userId);
     }
 
     public ResponseEntity<Resource> getUserImage(UUID userId) throws IOException {
