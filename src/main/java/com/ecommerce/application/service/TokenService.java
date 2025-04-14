@@ -68,6 +68,7 @@ public class TokenService {
         String refreshToken = request.getRefreshToken();
 
         if (refreshToken == null || !isRefreshTokenValid(refreshToken)) {
+            log.error("Refresh token {} is invalid!", refreshToken);
             throw new UnauthorizedException("Invalid refresh token");
         }
 

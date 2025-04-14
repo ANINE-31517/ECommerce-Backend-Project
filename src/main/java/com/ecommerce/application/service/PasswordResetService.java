@@ -37,10 +37,12 @@ public class PasswordResetService {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (user == null) {
+            log.error("Password reset failed. Email not found: {}", request.getEmail());
             throw new BadRequestException("Email does not exist.");
         }
 
         if (!user.isActive()) {
+            log.warn("Password reset failed. Account not activated for email: {}", request.getEmail());
             throw new BadRequestException("Account is not activated.");
         }
 
@@ -66,27 +68,32 @@ public class PasswordResetService {
                 .orElse(null);
 
         if (token == null) {
+            log.error("Password reset failed. Invalid token: {}", request.getToken());
             throw new BadRequestException("Invalid token.");
         }
 
         User user = token.getUser();
 
         if(user.isLocked()) {
+            log.warn("Password reset failed. Account locked for email: {}", user.getEmail());
             throw new BadRequestException("Account is Locked!");
         }
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.deleteByUser(user);
+            log.error("Password reset failed. Token expired for user ID: {}", user.getId());
             throw new BadRequestException("Token has expired.");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
+            log.error("Password reset failed. Passwords do not match for user ID: {}", user.getId());
             throw new BadRequestException("Passwords do not match.");
         }
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
         log.info("password has been successfully reset for user with email: {} ", user.getEmail());
+
         tokenRepository.deleteByUser(user);
     }
 }

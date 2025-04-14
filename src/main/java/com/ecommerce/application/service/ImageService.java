@@ -63,6 +63,7 @@ public class ImageService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if(userOpt.isEmpty()) {
+            log.error("User Id not found!");
             throw new BadRequestException("User Id not found!");
         }
 

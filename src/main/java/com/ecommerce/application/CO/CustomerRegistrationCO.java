@@ -1,10 +1,10 @@
 package com.ecommerce.application.CO;
 
+import com.ecommerce.application.constant.RegexPatternConstant;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
 
 @Data
 public class CustomerRegistrationCO {
@@ -14,13 +14,13 @@ public class CustomerRegistrationCO {
     private String email;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "^\\+?[1-9][0-9]{7,14}$", message = "Invalid phone number")
+    @Pattern(regexp = RegexPatternConstant.CONTACT_NUMBER_PATTERN, message = "Invalid phone number")
     private String contact;
 
-    @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter.")
-    @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter.")
-    @Pattern(regexp = ".*\\d.*", message = "Password must contain at least one number.")
-    @Pattern(regexp = ".*[\\W_].*", message = "Password must contain at least one special character.")
+    @Pattern(regexp = RegexPatternConstant.PASSWORD_UPPERCASE, message = "Password must contain at least one uppercase letter.")
+    @Pattern(regexp = RegexPatternConstant.PASSWORD_LOWERCASE, message = "Password must contain at least one lowercase letter.")
+    @Pattern(regexp = RegexPatternConstant.PASSWORD_DIGIT, message = "Password must contain at least one number.")
+    @Pattern(regexp = RegexPatternConstant.PASSWORD_SPECIAL_CHAR, message = "Password must contain at least one special character.")
     @NotBlank(message = "Password is mandatory")
     private String password;
 

@@ -44,10 +44,12 @@ public class UserService {
 
         Optional<User> userOptional = userRepository.findById(user.getId());
         if(userOptional.isEmpty()) {
+            log.error("Password update failed: User not found for ID: {}", user.getId());
             throw new BadRequestException("User not found!");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
+            log.error("Password update failed: Password and Confirm Password do not match for user: {}", user.getEmail());
             throw new BadRequestException("Password and Confirm Password must match!");
         }
 
@@ -67,6 +69,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found."));
 
         if (!address.getUser().getId().equals(currentUser.getId())) {
+            log.error("Address update failed: Unauthorized access by user: {}", currentUser.getEmail());
             throw new UnauthorizedException("You are not allowed to update this address.");
         }
 
@@ -173,12 +176,14 @@ public class UserService {
     public void logoutUser(String request) {
 
         if (request == null || !request.startsWith("Bearer ")) {
+            log.warn("Access token is missing or invalid format!");
             throw new BadRequestException("Access token is missing or invalid format!");
         }
 
         String token = request.substring(7);
 
         if (!tokenService.isAccessTokenValid(token)) {
+            log.error("Access token: {} is invalid or expired!", token);
             throw new UnauthorizedException("Invalid or expired access token!");
         }
 

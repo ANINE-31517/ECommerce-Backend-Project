@@ -57,10 +57,12 @@ public class CustomerService {
     @Transactional
     public void registerCustomer(CustomerRegistrationCO request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.error("Registration failed email {} already exists!", request.getEmail());
             throw new BadRequestException("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
+            log.error("Registration failed passwords do not match!");
             throw new BadRequestException("Passwords do not match");
         }
 
@@ -165,6 +167,7 @@ public class CustomerService {
         List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
 
         if(!allowedSortFields.contains(sortBy)) {
+            log.error("Invalid sort type is passed, choose among (id, email, createdAt)");
             throw new BadRequestException("Invalid Sort Type");
         }
 
@@ -194,12 +197,14 @@ public class CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isEmpty()) {
+            log.error("Customer with Id: {} not found!", customerId);
             throw new BadRequestException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
 
         if (customer.isActive()) {
+            log.warn("Customer with Id: {} is already active!", customer);
             throw new BadRequestException("Customer is already activated!");
         }
 
@@ -220,12 +225,14 @@ public class CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isEmpty()) {
+            log.error("Customer with the Id: {} not found!", customerId);
             throw new BadRequestException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
 
         if (!customer.isActive()) {
+            log.warn("Customer with Id: {} is already deActive!", customer);
             throw new BadRequestException("Customer is already deActivated!");
         }
 
@@ -246,18 +253,19 @@ public class CustomerService {
         User user = SecurityUtil.getCurrentUser();
 
         if (!(user instanceof Customer)) {
+            log.error("Current user with email: {} is not a customer!", user.getEmail());
             throw new BadRequestException("Current user is not a customer!");
         }
 
         Optional<Customer> optionalCustomer = customerRepository.findById(user.getId());
 
         if (optionalCustomer.isEmpty()) {
+            log.error("Customer with the email: {} not found!", user.getEmail());
             throw new BadRequestException("Customer not found!");
         }
 
         Customer customer = optionalCustomer.get();
         return convertToCustomerProfileVO(customer);
-
     }
 
     private CustomerProfileVO convertToCustomerProfileVO(Customer customer) {
@@ -286,21 +294,25 @@ public class CustomerService {
         User user = SecurityUtil.getCurrentUser();
 
         if (!(user instanceof Customer)) {
+            log.error("Current user with emailId: {} is not a customer!", user.getEmail());
             throw new BadRequestException("Current user is not a seller!");
         }
 
         Optional<Customer> optionalCustomer = customerRepository.findById(user.getId());
 
         if (optionalCustomer.isEmpty()) {
+            log.error("Customer with the emailId: {} not found!", user.getEmail());
             throw new BadRequestException("Customer not found!");
         }
 
         Customer customer = optionalCustomer.get();
 
         if (!customer.isActive()) {
+            log.warn("Current user with email: {} is not active!", user.getEmail());
             throw new BadRequestException("Account is not active. Cannot update profile.");
         }
         if (customer.isLocked()) {
+            log.warn("Current user with emailId: {} is locked!", user.getEmail());
             throw new BadRequestException("Account is locked. Cannot update profile.");
         }
 
@@ -346,6 +358,7 @@ public class CustomerService {
         );
 
         if (addressExists) {
+            log.error("Address already exists!");
             throw new BadRequestException("Address already exists.");
         }
 
@@ -370,6 +383,7 @@ public class CustomerService {
         List<Address> userAddresses = addressRepository.findAllByUserId(currentUser.getId());
 
         if (userAddresses.size() <= 1) {
+            log.error("Can not delete the default address!");
             throw new BadRequestException("Cannot delete the default address.");
         }
 
@@ -377,13 +391,12 @@ public class CustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found."));
 
         if (!address.getUser().getId().equals(currentUser.getId())) {
+            log.error("Unauthorized delete attempt by user ID: {} for address ID: {}", currentUser.getId(), addressId);
             throw new UnauthorizedException("You are not allowed to delete this address.");
         }
 
         addressRepository.delete(address);
         log.info("Address with ID: {} has been deleted successfully!", addressId);
     }
-
-
 }
 

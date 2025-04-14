@@ -1,5 +1,6 @@
 package com.ecommerce.application.CO;
 
+import com.ecommerce.application.constant.RegexPatternConstant;
 import com.ecommerce.application.entity.Address;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -33,7 +34,7 @@ public class SellerRegistrationCO {
     private AddressCO companyAddress;
 
     @NotBlank(message = "Company contact is required")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Company contact must be a 10-digit number")
+    @Pattern(regexp = RegexPatternConstant.CONTACT_NUMBER_PATTERN, message = "Company contact must be a 10-digit number")
     private String companyContact;
 
     @NotBlank(message = "First name is required")

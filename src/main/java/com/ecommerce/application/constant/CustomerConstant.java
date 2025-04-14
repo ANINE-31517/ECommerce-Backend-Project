@@ -4,7 +4,7 @@ import java.util.List;
 
 public class CustomerConstant {
 
-    public static final List<String> ALLOWED_SORT_FIELDS = List.of("id", "email", "createdAt");
-
     private CustomerConstant() {}
+
+    public static final List<String> ALLOWED_SORT_FIELDS = List.of("id", "email", "createdAt");
 }

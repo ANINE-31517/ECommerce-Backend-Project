@@ -1,5 +1,6 @@
 package com.ecommerce.application.CO;
 
+import com.ecommerce.application.constant.RegexPatternConstant;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class AddressUpdateCO {
     private String country;
     private String addressLine;
 
-    @Pattern(regexp = "^[0-9]{6}$", message = "Zip Code must be a 6-digit number")
+    @Pattern(regexp = RegexPatternConstant.ZIP_CODE_PATTERN, message = "Zip Code must be a 6-digit number")
     private String zipCode;
     private String label;
 }

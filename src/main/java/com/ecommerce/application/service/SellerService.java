@@ -54,18 +54,22 @@ public class SellerService {
     public void registerSeller(SellerRegistrationCO request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.error("Registration failed email {} already exists!", request.getEmail());
             throw new BadRequestException("Email already exists");
         }
 
         if (sellerRepository.findByGst(request.getGst()).isPresent()) {
+            log.error("Registration failed gst {} already exists!", request.getGst());
             throw new BadRequestException("Gst Number already exists");
         }
 
         if (sellerRepository.findByCompanyName(request.getCompanyName()).isPresent()) {
+            log.error("Registration failed company name {} already exists!", request.getCompanyName());
             throw new BadRequestException("Company Name already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
+            log.error("Registration failed: Passwords do not match for email: {}", request.getEmail());
             throw new BadRequestException("Password Mismatched");
         }
 
@@ -185,6 +189,7 @@ public class SellerService {
         List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
 
         if (!allowedSortFields.contains(sortBy)) {
+            log.error("Invalid sort type is passed, choose among (id, email, createdAt)");
             throw new BadRequestException("Invalid Sort Type");
         }
 
@@ -217,12 +222,14 @@ public class SellerService {
         Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
 
         if (sellerOptional.isEmpty()) {
+            log.error("Seller Id not found!");
             throw new BadRequestException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
 
         if (seller.isActive()) {
+            log.error("Seller with Id {} is already activated!", seller.getId());
             throw new BadRequestException("Seller is already activated!");
         }
 
@@ -243,12 +250,14 @@ public class SellerService {
         Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
 
         if (sellerOptional.isEmpty()) {
+            log.error("Seller id not found!");
             throw new BadRequestException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
 
         if (!seller.isActive()) {
+            log.error("Seller with Id {} is already deActivated!", seller.getId());
             throw new BadRequestException("Seller is already deActivated!");
         }
 
@@ -269,12 +278,14 @@ public class SellerService {
         User user = SecurityUtil.getCurrentUser();
 
         if (!(user instanceof Seller)) {
+            log.error("User with email {} is not a seller!", user.getEmail());
             throw new BadRequestException("Current user is not a seller!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
 
         if (optionalSeller.isEmpty()) {
+            log.error("Seller not found!");
             throw new BadRequestException("Seller not found!");
         }
 
@@ -312,21 +323,25 @@ public class SellerService {
         User user = SecurityUtil.getCurrentUser();
 
         if (!(user instanceof Seller)) {
+            log.error("User with the email {} is not a seller!", user.getEmail());
             throw new BadRequestException("Current user is not a seller!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
 
         if (optionalSeller.isEmpty()) {
+            log.error("Seller does not found!");
             throw new BadRequestException("Seller not found!");
         }
 
         Seller seller = optionalSeller.get();
 
         if (!seller.isActive()) {
+            log.warn("Profile update failed: Account is not active. User ID: {}", seller.getId());
             throw new BadRequestException("Account is not active. Cannot update profile.");
         }
         if (seller.isLocked()) {
+            log.warn("Profile update failed: Account is locked. User ID: {}", seller.getId());
             throw new BadRequestException("Account is locked. Cannot update profile.");
         }
 

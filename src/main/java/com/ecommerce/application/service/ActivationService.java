@@ -31,6 +31,7 @@ public class ActivationService {
         Optional<ActivationToken> tokenOpt = tokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
+            log.error("Activation failed: Invalid token {}", token);
             throw new BadRequestException("Invalid activation token!");
         }
 
@@ -38,7 +39,7 @@ public class ActivationService {
         Customer customer = activationToken.getCustomer();
 
         if(customer.isActive()) {
-            log.error("Customer with email {} is already active.", customer.getEmail());
+            log.warn("Customer with email {} is already active.", customer.getEmail());
             throw new BadRequestException("Account is already activated!");
         }
 
@@ -77,12 +78,14 @@ public class ActivationService {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
 
         if (customerOpt.isEmpty()) {
+            log.error("Resend activation failed email: {} not found!", email);
             throw new BadRequestException("Email not found");
         }
 
         Customer customer = customerOpt.orElseThrow(() -> new BadRequestException("Customer not found"));
 
         if (customer.isActive()) {
+            log.warn("Resend activation failed email: {} is already active!", email);
             throw new BadRequestException("Account is already activated");
         }
 
