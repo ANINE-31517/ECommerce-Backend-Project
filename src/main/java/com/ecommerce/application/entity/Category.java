@@ -29,7 +29,7 @@ public class Category {
     private int parentCategoryId;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<CategoryMetadataFieldValue> categoryMetadataFieldValues;
+    private List<CategoryMetaDataFieldValue> categoryMetaDataFieldValues;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class CategoryMetadataFieldVO {
+public class CategoryMetaDataFieldVO {
 
     private String message;
     private UUID fieldId;

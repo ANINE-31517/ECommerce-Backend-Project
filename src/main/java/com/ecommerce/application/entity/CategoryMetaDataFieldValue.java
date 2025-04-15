@@ -8,16 +8,15 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "category_metadata_field")
+@Table(name = "category_metadata_field_value")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryMetadataField {
+public class CategoryMetaDataFieldValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,9 +24,14 @@ public class CategoryMetadataField {
     @Column(columnDefinition = "CHAR(36)")
     private UUID id;
 
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "category_metadata_field_id")
+    private CategoryMetaDataField categoryMetadataField;
 
-    @OneToMany(mappedBy = "categoryMetadataField")
-    private List<CategoryMetadataFieldValue> categoryMetadataFieldValues;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    private String fieldValues;
 }
 
