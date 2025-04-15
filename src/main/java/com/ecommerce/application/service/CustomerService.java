@@ -48,7 +48,6 @@ public class CustomerService {
     private final ImageStorageConfig imageStorageConfig;
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
-    //private final AuditingService auditingService;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
@@ -98,7 +97,6 @@ public class CustomerService {
         log.info("Registration Successful! \n User: {} \n Role: {}",
                 customer.getEmail(),
                 customer.getRoles().getAuthority());
-        //auditingService.auditLog("REGISTER_CUSTOMER", customer.getEmail(), "Customer registered successfully!");
     }
 
 //    public TokenResponseVO loginCustomer(CustomerLoginCO request) {

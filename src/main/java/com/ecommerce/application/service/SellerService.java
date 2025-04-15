@@ -47,7 +47,6 @@ public class SellerService {
     private final PasswordEncoder passwordEncoder;
     private final ImageStorageConfig imageStorageConfig;
     private final UserRepository userRepository;
-    //private final AuditingService auditingService;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
@@ -121,7 +120,6 @@ public class SellerService {
         log.info("Registration Successful! \n User: {} \n Role: {}",
                 seller.getEmail(),
                 seller.getRoles().getAuthority());
-        //auditingService.auditLog("REGISTER_SELLER", seller.getEmail(), "Seller registered successfully!");
     }
 
 //    public TokenResponseVO loginSeller(SellerLoginCO request) {
