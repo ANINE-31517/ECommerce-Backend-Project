@@ -1,8 +1,10 @@
 package com.ecommerce.application.controller;
 
+import com.ecommerce.application.CO.CategoryCO;
 import com.ecommerce.application.CO.CategoryMetadataFieldCO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldListVO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldVO;
+import com.ecommerce.application.VO.CategoryVO;
 import com.ecommerce.application.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +20,14 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PostMapping("/admin/add-category")
+    @PostMapping("/admin/add-metadata-field")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryMetaDataFieldVO> create(@Valid @RequestBody CategoryMetadataFieldCO request) {
         CategoryMetaDataFieldVO response = categoryService.createField(request.getName());
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/admin/all-category")
+    @GetMapping("/admin/all-metadata-field")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<CategoryMetaDataFieldListVO>> getAllMetadataFields(
             @RequestParam(defaultValue = "0") int offset,
@@ -35,6 +37,12 @@ public class CategoryController {
             @RequestParam(required = false) String query
     ) {
         Page<CategoryMetaDataFieldListVO> response = categoryService.getAllFields(offset, max, sort, order, query);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/admin/add-category")
+    public ResponseEntity<CategoryVO> createCategory(@Valid @RequestBody CategoryCO request) {
+        CategoryVO response = categoryService.addCategory(request);
         return ResponseEntity.ok(response);
     }
 

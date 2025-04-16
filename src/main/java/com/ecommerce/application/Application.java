@@ -6,6 +6,7 @@ import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @EnableAsync
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
+@Slf4j
 public class Application {
 
 	private final PasswordEncoder passwordEncoder;
@@ -51,7 +53,9 @@ public class Application {
 			adminUser.setCreatedAt(LocalDateTime.now());
 
 			userRepository.save(adminUser);
-			logger.info("Admin user created: {}", adminUser.getEmail());
+			log.info("\n Registration Successful! \n User: {} \n Role: {}",
+					adminUser.getEmail(),
+					adminUser.getRoles().getAuthority());
 		} else {
 			logger.info("Admin user already exists.");
 		}

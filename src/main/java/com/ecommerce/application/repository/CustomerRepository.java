@@ -13,5 +13,4 @@ import java.util.UUID;
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Optional<Customer> findByEmail(String email);
     Page<Customer> findByEmailContainingIgnoreCase(String email, Pageable pageable);
-    Page<Customer> findAll(Pageable pageable);
 }

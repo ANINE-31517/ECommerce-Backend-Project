@@ -17,5 +17,4 @@ public interface SellerRepository extends JpaRepository<Seller, UUID> {
     Optional<Seller> findByCompanyName(String companyName);
     boolean existsByCompanyName(String companyName);
     Page<Seller> findByEmailContainingIgnoreCase(String email, Pageable pageable);
-    Page<Seller> findAll(Pageable pageable);
 }
