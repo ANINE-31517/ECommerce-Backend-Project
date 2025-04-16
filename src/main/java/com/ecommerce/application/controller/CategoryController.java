@@ -5,6 +5,7 @@ import com.ecommerce.application.CO.CategoryMetadataFieldCO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldListVO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldVO;
 import com.ecommerce.application.VO.CategoryVO;
+import com.ecommerce.application.VO.CategoryViewVO;
 import com.ecommerce.application.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,12 @@ public class CategoryController {
     @PostMapping("/admin/add-category")
     public ResponseEntity<CategoryVO> createCategory(@Valid @RequestBody CategoryCO request) {
         CategoryVO response = categoryService.addCategory(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/view-category/{id}")
+    public ResponseEntity<CategoryViewVO> viewCategory(@PathVariable String id) {
+        CategoryViewVO response = categoryService.viewCategory(id);
         return ResponseEntity.ok(response);
     }
 

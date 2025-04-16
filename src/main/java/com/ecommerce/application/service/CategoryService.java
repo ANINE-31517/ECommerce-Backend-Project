@@ -1,13 +1,13 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CategoryCO;
-import com.ecommerce.application.VO.CategoryMetaDataFieldListVO;
-import com.ecommerce.application.VO.CategoryMetaDataFieldVO;
-import com.ecommerce.application.VO.CategoryVO;
+import com.ecommerce.application.VO.*;
 import com.ecommerce.application.constant.CategoryConstant;
 import com.ecommerce.application.entity.Category;
 import com.ecommerce.application.entity.CategoryMetaDataField;
+import com.ecommerce.application.entity.CategoryMetaDataFieldValue;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.repository.CategoryMetadataFieldRepository;
 import com.ecommerce.application.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -159,6 +159,50 @@ public class CategoryService {
 
     private boolean parentHasProducts(Category parentCategory) {
         return parentCategory.getProducts() != null && !parentCategory.getProducts().isEmpty();
+    }
+
+    public CategoryViewVO viewCategory(String id) {
+        UUID categoryId = null;
+        try {
+            categoryId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid Category ID format!");
+        }
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
+
+        List<CategoryViewSummaryVO> parentHierarchy = new ArrayList<>();
+        Category current = category.getParentCategory();
+        while (current != null) {
+            parentHierarchy.addFirst(new CategoryViewSummaryVO(current.getId(), current.getName()));
+            current = current.getParentCategory();
+        }
+
+        List<CategoryViewSummaryVO> children = new ArrayList<>();
+        for (Category sub : category.getSubCategories()) {
+            children.add(new CategoryViewSummaryVO(sub.getId(), sub.getName()));
+        }
+
+        Map<String, Set<String>> metadataMap = new HashMap<>();
+
+        for (CategoryMetaDataFieldValue meta : category.getCategoryMetaDataFieldValues()) {
+            String fieldName = meta.getCategoryMetadataField().getName();
+            List<String> values = Arrays.asList(meta.getFieldValues().split(","));
+
+            if (!metadataMap.containsKey(fieldName)) {
+                metadataMap.put(fieldName, new HashSet<>());
+            }
+            metadataMap.get(fieldName).addAll(values);
+        }
+
+        return CategoryViewVO.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .parentHierarchy(parentHierarchy)
+                .children(children)
+                .metadataFields(metadataMap)
+                .build();
     }
 
 }
