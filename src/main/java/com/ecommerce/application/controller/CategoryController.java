@@ -3,10 +3,7 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.CategoryCO;
 import com.ecommerce.application.CO.CategoryMetadataFieldCO;
 import com.ecommerce.application.CO.UpdateCategoryCO;
-import com.ecommerce.application.VO.CategoryMetaDataFieldListVO;
-import com.ecommerce.application.VO.CategoryMetaDataFieldVO;
-import com.ecommerce.application.VO.CategoryVO;
-import com.ecommerce.application.VO.CategoryViewVO;
+import com.ecommerce.application.VO.*;
 import com.ecommerce.application.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,11 +53,18 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/admin/view-all-category")
-//    public ResponseEntity<CategoryViewALLVO> viewAllCategory() {
-//        CategoryViewALLVO response = categoryService.viewAllCategory();
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/admin/view-all-category")
+    public ResponseEntity<Page<CategoryViewVO>> viewAllCategories(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<CategoryViewVO> categories = categoryService.viewAllCategory(offset, max, sort, order, query);
+        return ResponseEntity.ok(categories);
+    }
+
 
     @PutMapping("/admin/update-category")
     @PreAuthorize("hasAuthority('ADMIN')")

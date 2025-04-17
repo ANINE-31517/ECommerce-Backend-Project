@@ -162,8 +162,6 @@ public class CustomerService {
 //    }
 
     public Page<CustomerRegisteredVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
-        log.info("Fetching customers - pageOffset: {}, pageSize: {}, sortBy: {}, emailFilter: {}", pageOffset, pageSize, sortBy, email);
-
         List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
 
         if(!allowedSortFields.contains(sortBy)) {

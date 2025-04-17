@@ -43,7 +43,6 @@ public class CategoryService {
 
         CategoryMetaDataField field = new CategoryMetaDataField();
         field.setName(name);
-        field.setCreatedAt(LocalDateTime.now());
 
         categoryMetadataFieldRepository.save(field);
         log.info("New metadata field created with name: {}", name);
@@ -57,7 +56,7 @@ public class CategoryService {
     public Page<CategoryMetaDataFieldListVO> getAllFields(int offset, int max, String sort, String order, String query) {
 
         if (!allowedSortFields.contains(sort)) {
-            log.error("Invalid sort type is passed, choose among (name, createdAt)");
+            log.error("Invalid sort type is passed, choose among (name, dateCreated)");
             throw new BadRequestException("Only 'name' and 'createdAt' are allowed in sort field.");
         }
 
@@ -206,9 +205,34 @@ public class CategoryService {
                 .build();
     }
 
-//    public CategoryViewAllVO viewAllCategory() {
-//
-//    }
+    public Page<CategoryViewVO> viewAllCategory(int offset, int max, String sort, String order, String query) {
+
+        if (!allowedSortFields.contains(sort)) {
+            log.error("Invalid sort type passed, choose among (name, dateCreated)");
+            throw new BadRequestException("Only 'name' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid order type is passed, choose among (asc or desc)");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<Category> allCategory;
+        if (query != null && !query.isBlank()) {
+            allCategory = categoryRepository.findByNameContainingIgnoreCase(query, pageable);
+        } else {
+            allCategory = categoryRepository.findAll(pageable);
+        }
+        log.info("Total categories fetched: {}", allCategory.getTotalElements());
+
+        return allCategory.map(category -> this.viewCategory(category.getId().toString()));
+    }
+
+
 
     public CategoryVO updateCategory(UpdateCategoryCO request) {
         String name = request.getName().trim();

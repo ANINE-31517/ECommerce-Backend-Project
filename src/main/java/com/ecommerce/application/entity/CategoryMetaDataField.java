@@ -27,7 +27,6 @@ public class CategoryMetaDataField {
     private UUID id;
 
     private String name;
-    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "categoryMetadataField")
     private List<CategoryMetaDataFieldValue> categoryMetaDataFieldValues;
