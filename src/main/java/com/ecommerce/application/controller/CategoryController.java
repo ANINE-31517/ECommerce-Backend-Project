@@ -2,6 +2,7 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.CategoryCO;
 import com.ecommerce.application.CO.CategoryMetadataFieldCO;
+import com.ecommerce.application.CO.UpdateCategoryCO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldListVO;
 import com.ecommerce.application.VO.CategoryMetaDataFieldVO;
 import com.ecommerce.application.VO.CategoryVO;
@@ -42,14 +43,29 @@ public class CategoryController {
     }
 
     @PostMapping("/admin/add-category")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryVO> createCategory(@Valid @RequestBody CategoryCO request) {
         CategoryVO response = categoryService.addCategory(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/admin/view-category/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryViewVO> viewCategory(@PathVariable String id) {
         CategoryViewVO response = categoryService.viewCategory(id);
+        return ResponseEntity.ok(response);
+    }
+
+//    @GetMapping("/admin/view-all-category")
+//    public ResponseEntity<CategoryViewALLVO> viewAllCategory() {
+//        CategoryViewALLVO response = categoryService.viewAllCategory();
+//        return ResponseEntity.ok(response);
+//    }
+
+    @PutMapping("/admin/update-category")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CategoryVO> updateCategory(@Valid @RequestBody UpdateCategoryCO request) {
+        CategoryVO response = categoryService.updateCategory(request);
         return ResponseEntity.ok(response);
     }
 

@@ -1,6 +1,7 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CategoryCO;
+import com.ecommerce.application.CO.UpdateCategoryCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.constant.CategoryConstant;
 import com.ecommerce.application.entity.Category;
@@ -128,13 +129,13 @@ public class CategoryService {
                 .build();
     }
 
-    private boolean isNameUniqueInHierarchy(String name, Category parentCategory) {
+    private boolean isNameUniqueInHierarchy(String name, Category category) {
 
-        if (parentCategory == null) {
+        if (category == null) {
             return !categoryRepository.existsByNameAndParentCategoryIsNull(name);
         }
 
-        Category root = parentCategory;
+        Category root = category;
         while (root.getParentCategory() != null) {
             root = root.getParentCategory();
         }
@@ -157,8 +158,8 @@ public class CategoryService {
         return true;
     }
 
-    private boolean parentHasProducts(Category parentCategory) {
-        return parentCategory.getProducts() != null && !parentCategory.getProducts().isEmpty();
+    private boolean parentHasProducts(Category category) {
+        return category.getProducts() != null && !category.getProducts().isEmpty();
     }
 
     public CategoryViewVO viewCategory(String id) {
@@ -202,6 +203,50 @@ public class CategoryService {
                 .parentHierarchy(parentHierarchy)
                 .children(children)
                 .metadataFields(metadataMap)
+                .build();
+    }
+
+//    public CategoryViewAllVO viewAllCategory() {
+//
+//    }
+
+    public CategoryVO updateCategory(UpdateCategoryCO request) {
+        String name = request.getName().trim();
+        String categoryCOId = request.getCategoryId();
+
+        Category category = null;
+        UUID categoryId = null;
+        try {
+            categoryId = UUID.fromString(categoryCOId);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for parentCategoryId!");
+        }
+
+        category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new BadRequestException("Category does not found!"));
+
+        if (name.equalsIgnoreCase(category.getName())) {
+            throw new BadRequestException("Same name provided!");
+        }
+
+        if (!isNameUniqueInHierarchy(name, category)) {
+            log.error("Category name '{}' already present in the hierarchy!", request.getName());
+            throw new BadRequestException("Category name must be unique in the hierarchy!");
+        }
+
+        if (parentHasProducts(category)) {
+            log.error("Category with Id {} already has products!", categoryId);
+            throw new BadRequestException("Cannot add a sub-category to a category that already has products!");
+        }
+
+        category.setName(name);
+
+        categoryRepository.save(category);
+        log.info("Category Updated with name: {}", name);
+
+        return CategoryVO.builder()
+                .message("Category updated successfully!")
+                .categoryId(categoryId)
                 .build();
     }
 
