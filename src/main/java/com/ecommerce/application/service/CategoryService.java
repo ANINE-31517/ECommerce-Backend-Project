@@ -1,6 +1,8 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.CategoryCO;
+import com.ecommerce.application.CO.CategoryMetaDataFieldValueCO;
+import com.ecommerce.application.CO.MetaDataFieldValueCO;
 import com.ecommerce.application.CO.UpdateCategoryCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.constant.CategoryConstant;
@@ -9,7 +11,8 @@ import com.ecommerce.application.entity.CategoryMetaDataField;
 import com.ecommerce.application.entity.CategoryMetaDataFieldValue;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.ResourceNotFoundException;
-import com.ecommerce.application.repository.CategoryMetadataFieldRepository;
+import com.ecommerce.application.repository.CategoryMetaDataFieldRepository;
+import com.ecommerce.application.repository.CategoryMetaDataFieldValueRepository;
 import com.ecommerce.application.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -28,8 +30,10 @@ import java.util.*;
 @Slf4j
 public class CategoryService {
 
-    private final CategoryMetadataFieldRepository categoryMetadataFieldRepository;
+    private final CategoryMetaDataFieldRepository categoryMetadataFieldRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryMetaDataFieldValueRepository categoryMetaDataFieldValueRepository;
+
 
     private static final List<String> allowedSortFields = CategoryConstant.ALLOWED_SORT_FIELDS;
     private static final List<String> allowedOrderFields = CategoryConstant.ALLOWED_ORDER_FIELDS;
@@ -187,7 +191,7 @@ public class CategoryService {
         Map<String, Set<String>> metadataMap = new HashMap<>();
 
         for (CategoryMetaDataFieldValue meta : category.getCategoryMetaDataFieldValues()) {
-            String fieldName = meta.getCategoryMetadataField().getName();
+            String fieldName = meta.getCategoryMetaDataField().getName();
             List<String> values = Arrays.asList(meta.getFieldValues().split(","));
 
             if (!metadataMap.containsKey(fieldName)) {
@@ -273,5 +277,52 @@ public class CategoryService {
                 .categoryId(categoryId)
                 .build();
     }
+
+    public void addMetaDataFieldValue(CategoryMetaDataFieldValueCO request) {
+        UUID categoryId;
+        try {
+            categoryId = UUID.fromString(request.getCategoryId());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid Category ID format");
+        }
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+            throw new BadRequestException("Metadata can only be added to a leaf category (no subcategories)");
+        }
+
+        for (MetaDataFieldValueCO fieldValueCO : request.getFieldValues()) {
+            UUID fieldId;
+            try {
+                fieldId = UUID.fromString(fieldValueCO.getFieldId());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid Metadata Field ID format");
+            }
+
+            CategoryMetaDataField field = categoryMetadataFieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found"));
+
+            Set<String> uniqueValues = new HashSet<>(fieldValueCO.getValues());
+            if (uniqueValues.size() != fieldValueCO.getValues().size()) {
+                throw new BadRequestException("Duplicate values found for metadata field: " + field.getName());
+            }
+
+            String joinUniqueValues = String.join(", ", uniqueValues);
+
+            if (categoryMetaDataFieldValueRepository.existsByFieldValues(joinUniqueValues)) {
+                throw new BadRequestException("Same field value already exists!");
+            }
+
+            CategoryMetaDataFieldValue fieldValue = new CategoryMetaDataFieldValue();
+            fieldValue.setCategory(category);
+            fieldValue.setCategoryMetaDataField(field);
+            fieldValue.setFieldValues(joinUniqueValues);
+
+            categoryMetaDataFieldValueRepository.save(fieldValue);
+        }
+    }
+
 
 }

@@ -25,8 +25,8 @@ public class CategoryMetaDataFieldValue {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "category_metadata_field_id")
-    private CategoryMetaDataField categoryMetadataField;
+    @JoinColumn(name = "category_metaData_field_id")
+    private CategoryMetaDataField categoryMetaDataField;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

@@ -1,12 +1,15 @@
 package com.ecommerce.application.controller;
 
 import com.ecommerce.application.CO.CategoryCO;
+import com.ecommerce.application.CO.CategoryMetaDataFieldValueCO;
 import com.ecommerce.application.CO.CategoryMetadataFieldCO;
 import com.ecommerce.application.CO.UpdateCategoryCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final MessageSource messageSource;
+
 
     @PostMapping("/admin/add-metadata-field")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -65,7 +70,6 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
-
     @PutMapping("/admin/update-category")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryVO> updateCategory(@Valid @RequestBody UpdateCategoryCO request) {
@@ -73,4 +77,10 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/admin/add-metadata-field-value")
+    public ResponseEntity<String> addMetadataFieldValue(@Valid @RequestBody CategoryMetaDataFieldValueCO request) {
+        categoryService.addMetaDataFieldValue(request);
+        String message = messageSource.getMessage("category.meta.data.field.value.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
+    }
 }

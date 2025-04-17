@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface CategoryMetadataFieldRepository extends JpaRepository<CategoryMetaDataField, UUID> {
+public interface CategoryMetaDataFieldRepository extends JpaRepository<CategoryMetaDataField, UUID> {
+
     boolean existsByNameIgnoreCase(String name);
     Page<CategoryMetaDataField> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

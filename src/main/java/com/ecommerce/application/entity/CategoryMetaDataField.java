@@ -28,7 +28,7 @@ public class CategoryMetaDataField {
 
     private String name;
 
-    @OneToMany(mappedBy = "categoryMetadataField")
+    @OneToMany(mappedBy = "categoryMetaDataField")
     private List<CategoryMetaDataFieldValue> categoryMetaDataFieldValues;
 }
 
