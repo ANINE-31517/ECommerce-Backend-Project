@@ -23,7 +23,6 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final MessageSource messageSource;
 
-
     @PostMapping("/admin/add-metadata-field")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryMetaDataFieldVO> create(@Valid @RequestBody CategoryMetadataFieldCO request) {
@@ -59,6 +58,7 @@ public class CategoryController {
     }
 
     @GetMapping("/admin/view-all-category")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<CategoryViewVO>> viewAllCategories(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int max,
@@ -78,9 +78,18 @@ public class CategoryController {
     }
 
     @PostMapping("/admin/add-metadata-field-value")
-    public ResponseEntity<String> addMetadataFieldValue(@Valid @RequestBody CategoryMetaDataFieldValueCO request) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> addMetaDataFieldValue(@Valid @RequestBody CategoryMetaDataFieldValueCO request) {
         categoryService.addMetaDataFieldValue(request);
         String message = messageSource.getMessage("category.meta.data.field.value.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
+    }
+
+    @PutMapping("/admin/update-metadata-field-value")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> updateMetaDataFieldValues(@RequestBody @Valid CategoryMetaDataFieldValueCO request) {
+        categoryService.updateMetaDataFieldValues(request);
+        String message = messageSource.getMessage("update.meta.data.field.value.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
     }
 }

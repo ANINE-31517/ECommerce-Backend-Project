@@ -14,6 +14,7 @@ import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.repository.CategoryMetaDataFieldRepository;
 import com.ecommerce.application.repository.CategoryMetaDataFieldValueRepository;
 import com.ecommerce.application.repository.CategoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -236,8 +238,6 @@ public class CategoryService {
         return allCategory.map(category -> this.viewCategory(category.getId().toString()));
     }
 
-
-
     public CategoryVO updateCategory(UpdateCategoryCO request) {
         String name = request.getName().trim();
         String categoryCOId = request.getCategoryId();
@@ -309,7 +309,7 @@ public class CategoryService {
                 throw new BadRequestException("Duplicate values found for metadata field: " + field.getName());
             }
 
-            String joinUniqueValues = String.join(", ", uniqueValues);
+            String joinUniqueValues = String.join(",", uniqueValues);
 
             if (categoryMetaDataFieldValueRepository.existsByFieldValues(joinUniqueValues)) {
                 throw new BadRequestException("Same field value already exists!");
@@ -324,5 +324,62 @@ public class CategoryService {
         }
     }
 
+    @Transactional
+    public void updateMetaDataFieldValues(CategoryMetaDataFieldValueCO request) {
+        UUID categoryId;
+        try {
+            categoryId = UUID.fromString(request.getCategoryId());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid Category ID format");
+        }
 
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+            throw new BadRequestException("Metadata can only be updated for a leaf category (no subcategories)");
+        }
+
+        for (MetaDataFieldValueCO fieldValueCO : request.getFieldValues()) {
+            UUID fieldId;
+            try {
+                fieldId = UUID.fromString(fieldValueCO.getFieldId());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid Metadata Field ID format");
+            }
+
+            CategoryMetaDataField field = categoryMetadataFieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found"));
+
+            Optional<CategoryMetaDataFieldValue> existingOptional =
+                    categoryMetaDataFieldValueRepository.findByCategoryIdAndCategoryMetaDataFieldId(categoryId, fieldId);
+
+            if (existingOptional.isEmpty()) {
+                throw new BadRequestException("Metadata Field is not associated with the given Category");
+            }
+
+            CategoryMetaDataFieldValue existing = existingOptional.get();
+            Set<String> currentValues = Arrays.stream(existing.getFieldValues().split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            Set<String> newValues = new HashSet<>(fieldValueCO.getValues());
+            if (newValues.size() != fieldValueCO.getValues().size()) {
+                throw new BadRequestException("Duplicate values found for metadata field: " + field.getName());
+            }
+
+            newValues.removeAll(currentValues);
+
+            if (newValues.isEmpty()) {
+                throw new BadRequestException("All provided values already exist for metadata field: " + field.getName());
+            }
+
+            currentValues.addAll(newValues);
+
+            String updatedValues = String.join(",", currentValues);
+            existing.setFieldValues(updatedValues);
+
+            categoryMetaDataFieldValueRepository.save(existing);
+        }
+    }
 }
