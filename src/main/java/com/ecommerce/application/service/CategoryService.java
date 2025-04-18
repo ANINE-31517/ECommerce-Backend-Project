@@ -304,16 +304,19 @@ public class CategoryService {
             CategoryMetaDataField field = categoryMetadataFieldRepository.findById(fieldId)
                     .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found"));
 
+            Optional<CategoryMetaDataFieldValue> existingOptional =
+                    categoryMetaDataFieldValueRepository.findByCategoryAndCategoryMetaDataField(category, field);
+
+            if (existingOptional.isPresent()) {
+                throw new BadRequestException("Category and Metadata Field pair already exists, kindly update the values!");
+            }
+
             Set<String> uniqueValues = new HashSet<>(fieldValueCO.getValues());
             if (uniqueValues.size() != fieldValueCO.getValues().size()) {
                 throw new BadRequestException("Duplicate values found for metadata field: " + field.getName());
             }
 
             String joinUniqueValues = String.join(",", uniqueValues);
-
-            if (categoryMetaDataFieldValueRepository.existsByFieldValues(joinUniqueValues)) {
-                throw new BadRequestException("Same field value already exists!");
-            }
 
             CategoryMetaDataFieldValue fieldValue = new CategoryMetaDataFieldValue();
             fieldValue.setCategory(category);
@@ -352,7 +355,7 @@ public class CategoryService {
                     .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found"));
 
             Optional<CategoryMetaDataFieldValue> existingOptional =
-                    categoryMetaDataFieldValueRepository.findByCategoryIdAndCategoryMetaDataFieldId(categoryId, fieldId);
+                    categoryMetaDataFieldValueRepository.findByCategoryAndCategoryMetaDataField(category, field);
 
             if (existingOptional.isEmpty()) {
                 throw new BadRequestException("Metadata Field is not associated with the given Category");
@@ -382,4 +385,64 @@ public class CategoryService {
             categoryMetaDataFieldValueRepository.save(existing);
         }
     }
+
+    public List<SellerCategoryViewSummaryVO> viewAllSellerCategory() {
+        List<Category> leafCategories = categoryRepository.findLeafCategories();
+        List<SellerCategoryViewSummaryVO> response = new ArrayList<>();
+
+        for (Category category : leafCategories) {
+            List<CategoryViewSummaryVO> parentHierarchy = new ArrayList<>();
+            Category parent = category.getParentCategory();
+
+            getParentHierarchy(parent, parentHierarchy);
+
+            List<MetaDataFieldVO> metaDataFields = new ArrayList<>();
+            List<CategoryMetaDataFieldValue> values = category.getCategoryMetaDataFieldValues();
+
+            if (values != null) {
+                for (CategoryMetaDataFieldValue value : values) {
+                    List<String> fieldValues = new ArrayList<>();
+
+                    if (value.getFieldValues() != null && !value.getFieldValues().isBlank()) {
+                        String[] splitValues = value.getFieldValues().split(",");
+                        for (String val : splitValues) {
+                            fieldValues.add(val.trim());
+                        }
+                    }
+                    convertToMetaDataFieldVO(metaDataFields, value, fieldValues);
+                }
+            }
+            SellerCategoryViewSummaryVO viewSummary = SellerCategoryViewSummaryVO.builder()
+                    .id(category.getId())
+                    .name(category.getName())
+                    .parentHierarchy(parentHierarchy)
+                    .metaDataFields(metaDataFields)
+                    .build();
+
+            response.add(viewSummary);
+        }
+
+        return response;
+    }
+
+    private void getParentHierarchy(Category parent, List<CategoryViewSummaryVO> parentHierarchy) {
+        while (parent != null) {
+            parentHierarchy.add(0, CategoryViewSummaryVO.builder()
+                    .id(parent.getId())
+                    .name(parent.getName())
+                    .build());
+            parent = parent.getParentCategory();
+        }
+    }
+
+    private void convertToMetaDataFieldVO(List<MetaDataFieldVO> metaDataFields, CategoryMetaDataFieldValue value, List<String> fieldValues) {
+        MetaDataFieldVO fieldVO = MetaDataFieldVO.builder()
+                .id(value.getCategoryMetaDataField().getId())
+                .name(value.getCategoryMetaDataField().getName())
+                .values(fieldValues)
+                .build();
+
+        metaDataFields.add(fieldVO);
+    }
+
 }

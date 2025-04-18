@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/category")
 @RequiredArgsConstructor
@@ -91,5 +93,12 @@ public class CategoryController {
         categoryService.updateMetaDataFieldValues(request);
         String message = messageSource.getMessage("update.meta.data.field.value.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/sellers/view-all-category")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<List<SellerCategoryViewSummaryVO>> viewAllSellerCategory() {
+        List<SellerCategoryViewSummaryVO> response = categoryService.viewAllSellerCategory();
+        return ResponseEntity.ok(response);
     }
 }
