@@ -101,4 +101,12 @@ public class CategoryController {
         List<SellerCategoryViewSummaryVO> response = categoryService.viewAllSellerCategory();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/customers/view-all-category")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<List<CategoryViewSummaryVO>> viewAllCustomerCategory(@RequestParam(required = false) String categoryId) {
+        List<CategoryViewSummaryVO> response = categoryService.viewAllCustomerCategory(categoryId);
+        return ResponseEntity.ok(response);
+    }
+
 }

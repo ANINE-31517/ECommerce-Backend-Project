@@ -16,4 +16,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     @Query("select c from Category c where c.subCategories is empty")
     List<Category> findLeafCategories();
+
+    List<Category> findByParentCategoryIsNull();
+    List<Category> findByParentCategory(Category category);
 }

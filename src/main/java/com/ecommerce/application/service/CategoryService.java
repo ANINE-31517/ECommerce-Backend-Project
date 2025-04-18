@@ -445,4 +445,34 @@ public class CategoryService {
         metaDataFields.add(fieldVO);
     }
 
+    public List<CategoryViewSummaryVO> viewAllCustomerCategory(String categoryId) {
+        List<Category> categories;
+
+        if (categoryId == null || categoryId.isBlank()) {
+            categories = categoryRepository.findByParentCategoryIsNull();
+        } else {
+            UUID parentId;
+            try {
+                parentId = UUID.fromString(categoryId);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid Category ID format!");
+            }
+
+            Category parentCategory = categoryRepository.findById(parentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
+
+            categories = categoryRepository.findByParentCategory(parentCategory);
+        }
+
+        List<CategoryViewSummaryVO> result = new ArrayList<>();
+        for (Category cat : categories) {
+            result.add(CategoryViewSummaryVO.builder()
+                    .id(cat.getId())
+                    .name(cat.getName())
+                    .build());
+        }
+
+        return result;
+    }
+
 }
