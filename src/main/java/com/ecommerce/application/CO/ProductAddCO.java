@@ -16,6 +16,6 @@ public class ProductAddCO {
     private String categoryId;
 
     private String description;
-    private boolean isCancellable;
-    private boolean isReturnable;
+    private Boolean cancellable = false;
+    private Boolean returnable = false;
 }

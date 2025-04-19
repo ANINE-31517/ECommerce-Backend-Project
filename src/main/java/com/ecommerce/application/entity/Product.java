@@ -40,6 +40,7 @@ public class Product {
     private boolean isReturnable;
     private String brand;
     private boolean isActive;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariation> productVariations;

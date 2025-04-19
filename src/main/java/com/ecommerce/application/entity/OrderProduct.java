@@ -29,7 +29,7 @@ public class OrderProduct {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    private Orders orders;
+    private Order order;
 
     @ManyToOne
     @JoinColumn(name = "product_variation_id", nullable = false)

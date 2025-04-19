@@ -39,7 +39,7 @@ public class CustomerController {
         return ResponseEntity.ok(message);
     }
 
-    @PostMapping("/resendActivationLink")
+    @PostMapping("/resend-activation-link")
     public ResponseEntity<String> resendActivationLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         activationService.resendActivationLink(email);

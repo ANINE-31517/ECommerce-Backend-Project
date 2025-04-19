@@ -18,14 +18,14 @@ public class ResetPasswordController {
     private final PasswordResetService passwordResetService;
     private final MessageSource messageSource;
 
-    @PostMapping("/forgotPassword")
+    @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordCO request) {
         passwordResetService.forgotPassword(request);
         String message = messageSource.getMessage("forget.password.link.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
     }
 
-    @PutMapping("/resetPassword")
+    @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordCO request) {
         passwordResetService.resetPassword(request);
         String message = messageSource.getMessage("reset.password.success", null, LocaleContextHolder.getLocale());

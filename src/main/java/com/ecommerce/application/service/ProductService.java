@@ -1,6 +1,8 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.ProductAddCO;
+import com.ecommerce.application.VO.CategoryViewSummaryVO;
+import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
@@ -67,8 +69,8 @@ public class ProductService {
         product.setBrand(request.getBrand());
         product.setDescription(request.getDescription());
         product.setCategory(category);
-        product.setCancellable(request.isCancellable());
-        product.setReturnable(request.isReturnable());
+        product.setCancellable(request.getCancellable());
+        product.setReturnable(request.getReturnable());
         product.setSeller(seller);
         product.setActive(false);
 
@@ -83,5 +85,41 @@ public class ProductService {
 
         log.info("Product added successfully under seller {}", seller.getEmail());
         emailService.sendEmail(adminEmail, subject, body);
+    }
+
+    public ProductViewVO viewProduct(String id) {
+        User user = SecurityUtil.getCurrentUser();
+        if (!(user instanceof Seller seller)) {
+            log.warn("User logged in with the emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Only sellers can add products");
+        }
+
+        UUID productId;
+        try {
+            productId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid product ID format!");
+        }
+
+        Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
+                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller"));
+
+        return convertToProductViewVO(product);
+    }
+
+    private ProductViewVO convertToProductViewVO(Product product) {
+        return ProductViewVO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .brand(product.getBrand())
+                .active(product.isActive())
+                .cancellable(product.isCancellable())
+                .returnable(product.isReturnable())
+                .category(CategoryViewSummaryVO.builder()
+                        .id(product.getCategory().getId())
+                        .name(product.getCategory().getName())
+                        .build())
+                .build();
     }
 }
