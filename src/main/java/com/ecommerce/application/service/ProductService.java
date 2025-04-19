@@ -4,6 +4,7 @@ import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.VO.CategoryViewSummaryVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.constant.AdminConstant;
+import com.ecommerce.application.constant.CategoryConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.CategoryRepository;
@@ -12,10 +13,16 @@ import com.ecommerce.application.repository.SellerRepository;
 import com.ecommerce.application.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +33,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final EmailService emailService;
     private final SellerRepository sellerRepository;
+
+    private static final List<String> allowedSortFields = CategoryConstant.ALLOWED_SORT_FIELDS;
+    private static final List<String> allowedOrderFields = CategoryConstant.ALLOWED_ORDER_FIELDS;
 
     public void addProduct(ProductAddCO request) {
         User user = SecurityUtil.getCurrentUser();
@@ -121,5 +131,31 @@ public class ProductService {
                         .name(product.getCategory().getName())
                         .build())
                 .build();
+    }
+
+    public Page<ProductViewVO> viewAllProduct(int offset, int max, String sort, String order, String query) {
+        if (!allowedSortFields.contains(sort)) {
+            log.error("Invalid sort type passed, choose among (name, dateCreated)");
+            throw new BadRequestException("Only 'name' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid order type is passed, choose among (asc or desc)");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<Product> products;
+        if (query != null && !query.isBlank()) {
+            products = productRepository.findByNameContainingIgnoreCase(query, pageable);
+        } else {
+            products = productRepository.findAll(pageable);
+        }
+        log.info("Total categories fetched: {}", products.getTotalElements());
+
+        return products.map(this::convertToProductViewVO);
     }
 }

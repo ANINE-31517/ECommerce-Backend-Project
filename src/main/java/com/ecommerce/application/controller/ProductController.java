@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,19 @@ public class ProductController {
     @PreAuthorize("hasAuthority('SELLER')")
     public ResponseEntity<ProductViewVO> viewProduct(@PathVariable String id) {
         ProductViewVO response = productService.viewProduct(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/sellers/view-all-product")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<Page<ProductViewVO>> viewAllProduct(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<ProductViewVO> response = productService.viewAllProduct(offset, max, sort, order, query);
         return ResponseEntity.ok(response);
     }
 }
