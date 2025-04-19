@@ -41,7 +41,7 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller)) {
             log.warn("User with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can add products");
+            throw new BadRequestException("Only sellers can add products!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
@@ -97,22 +97,15 @@ public class ProductService {
         emailService.sendEmail(adminEmail, subject, body);
     }
 
-    public ProductViewVO viewProduct(String id) {
+    public ProductViewVO viewProduct(UUID productId) {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller seller)) {
             log.warn("User logged in with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can add products");
-        }
-
-        UUID productId;
-        try {
-            productId = UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid product ID format!");
+            throw new BadRequestException("Only sellers can add products!");
         }
 
         Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
-                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller"));
+                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
 
         return convertToProductViewVO(product);
     }
@@ -157,5 +150,21 @@ public class ProductService {
         log.info("Total categories fetched: {}", products.getTotalElements());
 
         return products.map(this::convertToProductViewVO);
+    }
+
+    public void deleteProduct(UUID productId) {
+        User user = SecurityUtil.getCurrentUser();
+        if (!(user instanceof Seller seller)) {
+            log.warn("User logged in by the emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Only sellers can delete products");
+        }
+
+        Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
+                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
+
+        product.setDeleted(true);
+        productRepository.save(product);
+
+        log.info("Product with id {} deleted by seller with email {}", productId, seller.getEmail());
     }
 }

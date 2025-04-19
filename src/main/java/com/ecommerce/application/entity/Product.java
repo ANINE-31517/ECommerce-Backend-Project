@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.hibernate.type.SqlTypes;
 
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE product SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class Product extends Auditable {
 
     @Id
@@ -48,5 +52,10 @@ public class Product extends Auditable {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductReview> productReviews;
+
+    @PreRemove
+    public void preRemove() {
+        this.isDeleted = true;
+    }
 }
 

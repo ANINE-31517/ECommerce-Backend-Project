@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class ProductController {
 
     @GetMapping("/sellers/view-product/{id}")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<ProductViewVO> viewProduct(@PathVariable String id) {
+    public ResponseEntity<ProductViewVO> viewProduct(@PathVariable UUID id) {
         ProductViewVO response = productService.viewProduct(id);
         return ResponseEntity.ok(response);
     }
@@ -47,5 +49,13 @@ public class ProductController {
     ) {
         Page<ProductViewVO> response = productService.viewAllProduct(offset, max, sort, order, query);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/sellers/delete-product/{id}")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> deleteAddress(@PathVariable UUID id) {
+        productService.deleteProduct(id);
+        String message = messageSource.getMessage("product.delete.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 }
