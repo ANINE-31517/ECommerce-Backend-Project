@@ -2,6 +2,9 @@ package com.ecommerce.application.controller;
 
 
 import com.ecommerce.application.CO.ProductAddCO;
+import com.ecommerce.application.CO.UpdateCategoryCO;
+import com.ecommerce.application.CO.UpdateProductCO;
+import com.ecommerce.application.VO.CategoryVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
 import jakarta.validation.Valid;
@@ -56,6 +59,14 @@ public class ProductController {
     public ResponseEntity<String> deleteAddress(@PathVariable UUID id) {
         productService.deleteProduct(id);
         String message = messageSource.getMessage("product.delete.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
+    }
+
+    @PutMapping("/sellers/update-product")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> updateProduct(@Valid @RequestBody UpdateProductCO request) {
+        productService.updateProduct(request);
+        String message = messageSource.getMessage("product.update.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
     }
 }

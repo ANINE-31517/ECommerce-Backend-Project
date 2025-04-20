@@ -242,7 +242,6 @@ public class CategoryService {
         String name = request.getName().trim();
         String categoryCOId = request.getCategoryId();
 
-        Category category = null;
         UUID categoryId = null;
         try {
             categoryId = UUID.fromString(categoryCOId);
@@ -250,7 +249,7 @@ public class CategoryService {
             throw new BadRequestException("Invalid UUID for parentCategoryId!");
         }
 
-        category = categoryRepository.findById(categoryId)
+        Category category  = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category does not found!"));
 
         if (name.equalsIgnoreCase(category.getName())) {

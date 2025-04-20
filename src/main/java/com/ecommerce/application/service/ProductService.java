@@ -1,6 +1,7 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.ProductAddCO;
+import com.ecommerce.application.CO.UpdateProductCO;
 import com.ecommerce.application.VO.CategoryViewSummaryVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.constant.AdminConstant;
@@ -105,7 +106,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
-                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
+                .orElseThrow(() -> new BadRequestException("Product does not found or does not belong to the current seller!"));
 
         return convertToProductViewVO(product);
     }
@@ -166,5 +167,48 @@ public class ProductService {
         productRepository.save(product);
 
         log.info("Product with id {} deleted by seller with email {}", productId, seller.getEmail());
+    }
+
+    public void updateProduct(UpdateProductCO request) {
+        User user = SecurityUtil.getCurrentUser();
+        if (!(user instanceof Seller seller)) {
+            log.warn("Logged in user by the emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Only sellers can delete products");
+        }
+
+        String id = request.getId().trim();
+        UUID productId = null;
+        try {
+            productId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for product!");
+        }
+
+        Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
+                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
+
+        if (request.getName() != null && !request.getName().isBlank() && !request.getName().equals(product.getName())) {
+            boolean exists = productRepository.existsByNameAndBrandAndCategoryAndSeller(
+                    request.getName(), product.getBrand(), product.getCategory(), product.getSeller());
+
+            if (exists) {
+                throw new BadRequestException("Updated product name is not unique under the seller!");
+            }
+
+            product.setName(request.getName());
+        }
+
+        if (request.getDescription() != null && !request.getDescription().isBlank())
+            product.setDescription(request.getDescription());
+
+        if (request.getCancellable() != null)
+            product.setCancellable(request.getCancellable());
+
+        if (request.getReturnable() != null)
+            product.setReturnable(request.getReturnable());
+
+        productRepository.save(product);
+
+        log.info("Product Updated under the seller: {}", seller.getEmail());
     }
 }
