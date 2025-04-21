@@ -331,7 +331,6 @@ public class ProductService {
     }
 
     public void activateProduct(UUID id) {
-
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Product does not found with the given id!"));
 
@@ -351,5 +350,27 @@ public class ProductService {
 
         emailService.sendEmail(sellerEmail, subject, body);
         log.info("Product with id: {} has been activated by the admin!", product.getId());
+    }
+
+    public void deActivateProduct(UUID id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Product does not found with the given id!"));
+
+        if (!product.isActive()) {
+            throw new BadRequestException("Product is already not active or has been deActivated by the admin!");
+        }
+
+        product.setActive(false);
+        productRepository.save(product);
+
+        String sellerEmail = product.getSeller().getEmail();
+        String subject = "Product deActivated!";
+        String body = "<p><strong>The following product is deActivated:</strong></p>" +
+                "<p>Name: " + product.getName() + "</p>" +
+                "<p>Brand: " + product.getBrand() + "</p>" +
+                "<p>Seller: " + sellerEmail + "</p>";
+
+        emailService.sendEmail(sellerEmail, subject, body);
+        log.info("Product with id: {} has been deActivated by the admin!", product.getId());
     }
 }

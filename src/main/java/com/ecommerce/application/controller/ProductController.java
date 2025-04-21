@@ -90,4 +90,12 @@ public class ProductController {
         return ResponseEntity.ok(message);
     }
 
+    @PutMapping("/admin/deActivate-product/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> deActivateProduct(@PathVariable UUID id) {
+        productService.deActivateProduct(id);
+        String message = messageSource.getMessage("product.deActivate.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
+    }
+
 }
