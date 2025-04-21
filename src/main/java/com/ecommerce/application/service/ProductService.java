@@ -1,6 +1,7 @@
 package com.ecommerce.application.service;
 
 import com.ecommerce.application.CO.ProductAddCO;
+import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
 import com.ecommerce.application.VO.CategoryViewSummaryVO;
 import com.ecommerce.application.VO.ProductViewVO;
@@ -8,21 +9,25 @@ import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.constant.CategoryConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
-import com.ecommerce.application.repository.CategoryRepository;
-import com.ecommerce.application.repository.ProductRepository;
-import com.ecommerce.application.repository.SellerRepository;
+import com.ecommerce.application.repository.*;
 import com.ecommerce.application.security.SecurityUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -34,10 +39,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final EmailService emailService;
     private final SellerRepository sellerRepository;
+    private final ProductVariationRepository productVariationRepository;
+    private final CategoryMetaDataFieldValueRepository categoryMetaDataFieldValueRepository;
+    private final ImageService imageService;
 
     private static final List<String> allowedSortFields = CategoryConstant.ALLOWED_SORT_FIELDS;
     private static final List<String> allowedOrderFields = CategoryConstant.ALLOWED_ORDER_FIELDS;
 
+    @Transactional
     public void addProduct(ProductAddCO request) {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller)) {
@@ -169,6 +178,7 @@ public class ProductService {
         log.info("Product with id {} deleted by seller with email {}", productId, seller.getEmail());
     }
 
+    @Transactional
     public void updateProduct(UpdateProductCO request) {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller seller)) {
@@ -177,7 +187,7 @@ public class ProductService {
         }
 
         String id = request.getId().trim();
-        UUID productId = null;
+        UUID productId;
         try {
             productId = UUID.fromString(id);
         } catch (IllegalArgumentException ex) {
@@ -210,5 +220,136 @@ public class ProductService {
         productRepository.save(product);
 
         log.info("Product Updated under the seller: {}", seller.getEmail());
+    }
+
+    @Transactional
+    public void addProductVariation(ProductVariationAddCO request,
+                                    MultipartFile primaryImage,
+                                    List<MultipartFile> secondaryImages) throws IOException {
+        User user = SecurityUtil.getCurrentUser();
+        if (!(user instanceof Seller)) {
+            log.warn("Unauthorized user attempting product variation add: {}", user.getEmail());
+            throw new BadRequestException("Only sellers can add product variations.");
+        }
+
+        String id = request.getProductId().trim();
+        UUID productId;
+        try {
+            productId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for product!");
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BadRequestException("Product Id not found!"));
+
+        if (!product.isActive() || product.isDeleted()) {
+            throw new BadRequestException("Product is either not active or is deleted!");
+        }
+
+        Category category = product.getCategory();
+        List<CategoryMetaDataFieldValue> allowedFieldValues = categoryMetaDataFieldValueRepository.findByCategory(category);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> metadataMap;
+        try {
+            metadataMap = objectMapper.readValue(request.getMetadata(), Map.class);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Metadata is not appropriate!");
+        }
+
+        Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
+
+        for (CategoryMetaDataFieldValue cmv : allowedFieldValues) {
+            Set<String> filedValues = Arrays.stream(cmv.getFieldValues().split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            fieldAllowedMap.put(
+                    cmv.getCategoryMetaDataField().getName(),
+                    filedValues
+            );
+        }
+
+        for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
+            String field = entry.getKey().toLowerCase();
+            String value = entry.getValue().trim();
+            Set<String> allowedValues = fieldAllowedMap.get(field);
+
+            if (allowedValues == null || !allowedValues.contains(value)) {
+                throw new BadRequestException("Invalid value for metadata field: " + field + "!");
+            }
+        }
+
+        List<ProductVariation> existingVariations = productVariationRepository.findByProduct(product);
+
+        if (!existingVariations.isEmpty()) {
+            Set<String> currentKeys = new HashSet<>(metadataMap.keySet());
+
+            String existingMetadataJson = existingVariations.getFirst().getMetadata();
+            Map<String, String> existingMetadataMap = new ObjectMapper().readValue(existingMetadataJson, new TypeReference<>() {});
+            Set<String> existingKeys = new HashSet<>(existingMetadataMap.keySet());
+
+            if (!currentKeys.equals(existingKeys)) {
+                throw new BadRequestException("Metadata structure doesn't match existing variations of this product.");
+            }
+        }
+
+        ProductVariation variation = new ProductVariation();
+        variation.setProduct(product);
+        variation.setQuantityAvailable(request.getQuantityAvailable());
+        variation.setPrice(request.getPrice());
+        variation.setActive(true);
+        variation.setDeleted(false);
+        variation.setMetadata(new ObjectMapper().writeValueAsString(request.getMetadata()));
+
+        productVariationRepository.save(variation);
+
+        UUID variationId = variation.getId();
+        int imageCount = 0;
+        if (primaryImage == null || primaryImage.isEmpty()) {
+            throw new BadRequestException("Primary Image is required!");
+        }
+        imageService.downloadAndStoreImageFromUrl(primaryImage, variationId, imageCount);
+        imageCount += 1;
+
+        if (!secondaryImages.isEmpty()) {
+            for (MultipartFile secondaryImage: secondaryImages) {
+                imageService.downloadAndStoreImageFromUrl(secondaryImage, variationId, imageCount);
+                imageCount +=1;
+            }
+        }
+
+        String extension = FilenameUtils.getExtension(primaryImage.getOriginalFilename());
+        String primaryImageName = variation.getId() + "." + extension;
+        variation.setPrimaryImageName(primaryImageName);
+
+        variation.setImageCount(imageCount);
+        productVariationRepository.save(variation);
+
+        log.info("Product Variation added successfully with id: {}", variationId);
+    }
+
+    public void activateProduct(UUID id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Product does not found with the given id!"));
+
+        if (product.isActive()) {
+            throw new BadRequestException("Product is already activated by the admin!");
+        }
+
+        product.setActive(true);
+        productRepository.save(product);
+
+        String sellerEmail = product.getSeller().getEmail();
+        String subject = "Product Activated!";
+        String body = "<p><strong>The following product is activated:</strong></p>" +
+                "<p>Name: " + product.getName() + "</p>" +
+                "<p>Brand: " + product.getBrand() + "</p>" +
+                "<p>Seller: " + sellerEmail + "</p>";
+
+        emailService.sendEmail(sellerEmail, subject, body);
+        log.info("Product with id: {} has been activated by the admin!", product.getId());
     }
 }
