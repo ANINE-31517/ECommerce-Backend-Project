@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
     private final MessageSource messageSource;
 
-    @PutMapping("/updatePassword")
+    @PutMapping("/update-password")
     @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER')")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordCO request) {
         userService.updatePassword(request);
@@ -32,7 +32,7 @@ public class UserController {
         return ResponseEntity.ok(message);
     }
 
-    @PatchMapping("/addressUpdate")
+    @PatchMapping("/address-update")
     //@PreAuthorize("(hasAuthority('CUSTOMER') or hasAuthority('SELLER')) and @securityService.isValidUser(request.id, authentication)")
     @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER')")
     public ResponseEntity<String> updateAddress(@Valid @RequestBody AddressUpdateCO request) {
@@ -41,7 +41,7 @@ public class UserController {
         return ResponseEntity.ok(message);
     }
 
-    @GetMapping("/getAddress")
+    @GetMapping("/get-address")
     @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('SELLER')")
     public ResponseEntity<List<AddressVO>> getAddresses() {
         List<AddressVO> addresses = userService.getAddresses();

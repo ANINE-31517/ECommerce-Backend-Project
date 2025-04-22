@@ -35,7 +35,7 @@ public class AdminController {
 //    }
 
 
-    @GetMapping("/getCustomer")
+    @GetMapping("/get-customer")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<CustomerRegisteredVO>> getAllCustomers(
             @RequestParam(defaultValue = "0") int pageOffset,
@@ -47,7 +47,7 @@ public class AdminController {
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/getSeller")
+    @GetMapping("/get-seller")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<SellerRegisteredVO>> getAllSellers(
             @RequestParam(defaultValue = "0") int pageOffset,
@@ -59,28 +59,28 @@ public class AdminController {
         return ResponseEntity.ok(sellers);
     }
 
-    @PatchMapping("/activateCustomer/{customerId}")
+    @PatchMapping("/activate-customer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserActivatedDeActivateVO> activateCustomer(@PathVariable UUID customerId) {
         UserActivatedDeActivateVO response = customerService.activateCustomer(customerId);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/activateSeller/{sellerId}")
+    @PatchMapping("/activate-seller/{sellerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserActivatedDeActivateVO> activateSeller(@PathVariable UUID sellerId) {
         UserActivatedDeActivateVO response = sellerService.activateSeller(sellerId);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/deActivateCustomer/{customerId}")
+    @PatchMapping("/deActivate-customer/{customerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserActivatedDeActivateVO> deActivateCustomer(@PathVariable UUID customerId) {
         UserActivatedDeActivateVO response = customerService.deActivateCustomer(customerId);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/deActivateSeller/{sellerId}")
+    @PatchMapping("/deActivate-seller/{sellerId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserActivatedDeActivateVO> deActivateSeller(@PathVariable UUID sellerId) {
         UserActivatedDeActivateVO response = sellerService.deActivateSeller(sellerId);

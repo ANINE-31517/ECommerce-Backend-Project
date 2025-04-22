@@ -67,14 +67,14 @@ public class CustomerController {
         return ResponseEntity.ok(profile);
     }
 
-    @PatchMapping("/updateProfile")
+    @PatchMapping("/update-profile")
     @PreAuthorize("hasAnyAuthority('CUSTOMER')")
     public ResponseEntity<ProfileUpdateVO> updateProfile(@Valid @RequestBody CustomerProfileUpdateCO customerProfileUpdateCO) {
         ProfileUpdateVO profileUpdateVO = customerService.updateProfile(customerProfileUpdateCO);
         return ResponseEntity.ok(profileUpdateVO);
     }
 
-    @PostMapping("/addAddress")
+    @PostMapping("/add-address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> addAddress(@Valid @RequestBody AddressCO request) {
         customerService.addAddress(request);
@@ -82,7 +82,7 @@ public class CustomerController {
         return ResponseEntity.ok(message);
     }
 
-    @DeleteMapping("/deleteAddress/{addressId}")
+    @DeleteMapping("/delete-address/{addressId}")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> deleteAddress(@PathVariable UUID addressId) {
         customerService.deleteAddress(addressId);

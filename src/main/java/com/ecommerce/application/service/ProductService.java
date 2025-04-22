@@ -254,7 +254,7 @@ public class ProductService {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> metadataMap;
         try {
-            metadataMap = objectMapper.readValue(request.getMetadata(), Map.class);
+            metadataMap = objectMapper.readValue(request.getMetadata(), new TypeReference<Map<String, String>>() {});
         } catch (JsonProcessingException e) {
             throw new BadRequestException("Metadata is not appropriate!");
         }
@@ -288,7 +288,7 @@ public class ProductService {
             Set<String> currentKeys = new HashSet<>(metadataMap.keySet());
 
             String existingMetadataJson = existingVariations.getFirst().getMetadata();
-            Map<String, String> existingMetadataMap = new ObjectMapper().readValue(existingMetadataJson, new TypeReference<>() {});
+            Map<String, String> existingMetadataMap = objectMapper.readValue(existingMetadataJson, new TypeReference<Map<String, String>>() {});
             Set<String> existingKeys = new HashSet<>(existingMetadataMap.keySet());
 
             if (!currentKeys.equals(existingKeys)) {
@@ -301,8 +301,7 @@ public class ProductService {
         variation.setQuantityAvailable(request.getQuantityAvailable());
         variation.setPrice(request.getPrice());
         variation.setActive(true);
-        variation.setMetadata(new ObjectMapper().writeValueAsString(request.getMetadata()));
-
+        variation.setMetadata(objectMapper.writeValueAsString(metadataMap));
         productVariationRepository.save(variation);
 
         UUID variationId = variation.getId();
@@ -356,7 +355,7 @@ public class ProductService {
         return convertToProductVariationViewVO(productVariation);
     }
 
-    private ProductVariationViewVO convertToProductVariationViewVO(ProductVariation productVariation) {
+    public ProductVariationViewVO convertToProductVariationViewVO(ProductVariation productVariation) {
 
         return ProductVariationViewVO.builder()
                 .id(productVariation.getId())
@@ -366,6 +365,52 @@ public class ProductService {
                 .metadata(productVariation.getMetadata())
                 .productViewVO(convertToProductViewVO(productVariation.getProduct()))
                 .build();
+    }
+
+    public Page<ProductVariationViewVO> viewAllProductVariation(UUID id, int offset, int max, String sort, String order, String query) {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Seller seller)) {
+            log.warn("LoggedIn user with the emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Sellers are authorized to view product variation!");
+        }
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+
+        if (!product.isActive() || product.isDeleted()) {
+            log.warn("Product id: {} is either not active or is deleted!", product.getId());
+            throw new BadRequestException("Product is either not active or is deleted!");
+        }
+
+        if (!product.getSeller().getId().equals(user.getId())) {
+            log.warn("Product with id: {} is not created by the seller with id : {} !", id, seller.getId());
+            throw new BadRequestException("Logged in seller is not the creator of the product variation!");
+        }
+
+        if (!allowedSortFields.contains(sort)) {
+            log.error("Invalid sort type passed, choose among (price, dateCreated)!");
+            throw new BadRequestException("Only 'price' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid order type is passed, choose either asc or desc!");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<ProductVariation> productVariations;
+        if (query != null && !query.isBlank()) {
+            productVariations = productVariationRepository.findAllByMetadataContainingIgnoreCaseAndProduct(query, product, pageable);
+        } else {
+            productVariations = productVariationRepository.findAllByProduct(pageable, product);
+        }
+        log.info("Total categories fetched are: {}", productVariations.getTotalElements());
+
+        return productVariations.map(this::convertToProductVariationViewVO);
     }
 
     public void activateProduct(UUID id) {

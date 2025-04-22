@@ -90,6 +90,20 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/sellers/view-all-product-variation/{id}")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<Page<ProductVariationViewVO>> viewAllProductVariation(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "price") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<ProductVariationViewVO> response = productService.viewAllProductVariation(id, offset, max, sort, order, query);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/admin/activate-product/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> activateProduct(@PathVariable UUID id) {

@@ -48,7 +48,7 @@ public class SellerController {
         return ResponseEntity.ok(profile);
     }
 
-    @PatchMapping("/updateProfile")
+    @PatchMapping("/update-profile")
     @PreAuthorize("hasAnyAuthority('SELLER')")
     public ResponseEntity<ProfileUpdateVO> updateProfile(@Valid @RequestBody SellerProfileUpdateCO sellerProfileUpdateCO) {
         ProfileUpdateVO profileUpdateVO = sellerService.updateProfile(sellerProfileUpdateCO);
