@@ -4,6 +4,7 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
+import com.ecommerce.application.VO.AdminProductViewVO;
 import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
@@ -118,6 +119,13 @@ public class ProductController {
         productService.deActivateProduct(id);
         String message = messageSource.getMessage("product.deActivate.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/admin/view-product/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<AdminProductViewVO> adminProductView(@PathVariable String id) {
+        AdminProductViewVO response = productService.adminProductView(id);
+        return ResponseEntity.ok(response);
     }
 
 }

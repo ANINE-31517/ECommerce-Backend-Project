@@ -3,9 +3,7 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
-import com.ecommerce.application.VO.CategoryViewSummaryVO;
-import com.ecommerce.application.VO.ProductVariationViewVO;
-import com.ecommerce.application.VO.ProductViewVO;
+import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.constant.CategoryConstant;
@@ -427,6 +425,51 @@ public class ProductService {
         log.info("Total categories fetched are: {}", productVariations.getTotalElements());
 
         return productVariations.map(this::convertToProductVariationViewVO);
+    }
+
+    public AdminProductViewVO adminProductView(String id) {
+
+        UUID productId;
+        try {
+            productId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for product!");
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+
+        return convertToAdminProductViewVO(product);
+    }
+
+    private AdminProductViewVO convertToAdminProductViewVO(Product product) {
+
+        return AdminProductViewVO.builder()
+                .productId(product.getId())
+                .name(product.getName())
+                .brand(product.getBrand())
+                .active(product.isActive())
+                .category(CategoryViewSummaryVO.builder()
+                        .id(product.getCategory().getId())
+                        .name(product.getCategory().getName())
+                        .build())
+                .productVariations(convertToProductVariationImageVO(product))
+                .build();
+    }
+
+    private List<ProductVariationImageVO> convertToProductVariationImageVO(Product product) {
+        List<ProductVariationImageVO> productVariationImageVOS = new ArrayList<>();
+        List<ProductVariation> productVariations = productVariationRepository.findByProduct(product);
+
+        for (ProductVariation productVariation : productVariations) {
+            productVariationImageVOS.add(
+                    ProductVariationImageVO.builder()
+                            .variationId(productVariation.getId())
+                            .primaryImageUrl("http://localhost:8080/api/images/product-variation/" + productVariation.getId())
+                            .build()
+            );
+        }
+        return productVariationImageVOS;
     }
 
     public void activateProduct(UUID id) {
