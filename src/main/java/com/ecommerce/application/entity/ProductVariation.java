@@ -34,7 +34,6 @@ public class ProductVariation {
     private String primaryImageName;
     private String metadata;
     private boolean isActive;
-    private boolean isDeleted;
     private int imageCount;
 
     @OneToMany(mappedBy = "productVariation", cascade = CascadeType.ALL)

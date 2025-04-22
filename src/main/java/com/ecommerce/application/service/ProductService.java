@@ -4,6 +4,7 @@ import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
 import com.ecommerce.application.VO.CategoryViewSummaryVO;
+import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.constant.CategoryConstant;
@@ -120,7 +121,7 @@ public class ProductService {
         return convertToProductViewVO(product);
     }
 
-    private ProductViewVO convertToProductViewVO(Product product) {
+    public ProductViewVO convertToProductViewVO(Product product) {
         return ProductViewVO.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -300,7 +301,6 @@ public class ProductService {
         variation.setQuantityAvailable(request.getQuantityAvailable());
         variation.setPrice(request.getPrice());
         variation.setActive(true);
-        variation.setDeleted(false);
         variation.setMetadata(new ObjectMapper().writeValueAsString(request.getMetadata()));
 
         productVariationRepository.save(variation);
@@ -328,6 +328,44 @@ public class ProductService {
         productVariationRepository.save(variation);
 
         log.info("Product Variation added successfully with id: {}", variationId);
+    }
+
+    public ProductVariationViewVO viewProductVariation(UUID productVariationId) {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Seller seller)) {
+            log.warn("Logged in user with the emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Sellers are authorized to view product variation!");
+        }
+
+        ProductVariation productVariation = productVariationRepository.findById(productVariationId)
+                .orElseThrow(() -> new BadRequestException("Product variation does not found!"));
+
+        Product product = productVariation.getProduct();
+
+        if (!product.isActive() || product.isDeleted()) {
+            log.warn("Product with id: {} is either not active or is deleted!", product.getId());
+            throw new BadRequestException("Product is either not active or is deleted!");
+        }
+
+        if (!product.getSeller().getId().equals(user.getId())) {
+            log.warn("Product variation with id: {} is not created by the seller with id : {} !", productVariationId, seller.getId());
+            throw new BadRequestException("Logged in seller is not the creator of the product variation!");
+        }
+
+        return convertToProductVariationViewVO(productVariation);
+    }
+
+    private ProductVariationViewVO convertToProductVariationViewVO(ProductVariation productVariation) {
+
+        return ProductVariationViewVO.builder()
+                .id(productVariation.getId())
+                .price(productVariation.getPrice())
+                .isActive(productVariation.isActive())
+                .quantityAvailable(productVariation.getQuantityAvailable())
+                .metadata(productVariation.getMetadata())
+                .productViewVO(convertToProductViewVO(productVariation.getProduct()))
+                .build();
     }
 
     public void activateProduct(UUID id) {

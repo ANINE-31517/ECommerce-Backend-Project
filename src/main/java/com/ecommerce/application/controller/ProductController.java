@@ -4,6 +4,7 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
+import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
 import jakarta.validation.Valid;
@@ -80,6 +81,13 @@ public class ProductController {
         productService.addProductVariation(request, primaryImage, secondaryImages);
         String message = messageSource.getMessage("product.variation.add.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/sellers/view-product-variation/{id}")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<ProductVariationViewVO> viewProductVariation(@PathVariable UUID id) {
+        ProductVariationViewVO response = productService.viewProductVariation(id);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/admin/activate-product/{id}")
