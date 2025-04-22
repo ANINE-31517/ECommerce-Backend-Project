@@ -35,4 +35,9 @@ public class ImageController {
     public ResponseEntity<Resource> getUserImage(@PathVariable UUID userId) throws IOException {
         return imageService.getUserImage(userId);
     }
+
+    @GetMapping("/product-variation/{productVariationId}")
+    public ResponseEntity<Resource> getProductVariationImage(@PathVariable UUID productVariationId) throws IOException {
+        return imageService.getProductVariationImage(productVariationId);
+    }
 }

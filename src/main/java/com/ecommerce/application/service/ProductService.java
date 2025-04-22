@@ -6,8 +6,10 @@ import com.ecommerce.application.CO.UpdateProductCO;
 import com.ecommerce.application.VO.CategoryViewSummaryVO;
 import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
+import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.AdminConstant;
 import com.ecommerce.application.constant.CategoryConstant;
+import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.repository.*;
@@ -27,6 +29,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +48,7 @@ public class ProductService {
     private final ProductVariationRepository productVariationRepository;
     private final CategoryMetaDataFieldValueRepository categoryMetaDataFieldValueRepository;
     private final ImageService imageService;
+    private final ImageStorageConfig imageStorageConfig;
 
     private static final List<String> allowedSortFields = CategoryConstant.ALLOWED_SORT_FIELDS;
     private static final List<String> allowedOrderFields = CategoryConstant.ALLOWED_ORDER_FIELDS;
@@ -357,12 +363,22 @@ public class ProductService {
 
     public ProductVariationViewVO convertToProductVariationViewVO(ProductVariation productVariation) {
 
+        String primaryImageUrl = "Image not uploaded!";
+
+        for (String ext : ImageConstant.ALLOWED_EXTENSIONS) {
+            Path path = Paths.get(imageStorageConfig.getBasePath(), "product-variation", productVariation.getId().toString() + "." + ext);
+            if (Files.exists(path)) {
+                primaryImageUrl = "http://localhost:8080/api/images/product-variation/" + productVariation.getId();
+                break;
+            }
+        }
         return ProductVariationViewVO.builder()
                 .id(productVariation.getId())
                 .price(productVariation.getPrice())
                 .isActive(productVariation.isActive())
                 .quantityAvailable(productVariation.getQuantityAvailable())
                 .metadata(productVariation.getMetadata())
+                .primaryImageName(primaryImageUrl)
                 .productViewVO(convertToProductViewVO(productVariation.getProduct()))
                 .build();
     }

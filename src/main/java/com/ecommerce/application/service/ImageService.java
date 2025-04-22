@@ -5,6 +5,7 @@ import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.ProductVariation;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.repository.ProductVariationRepository;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +22,12 @@ import org.springframework.core.io.UrlResource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
-import java.net.URL;
 
 
 @Service
@@ -38,6 +37,7 @@ public class ImageService {
 
     private final ImageStorageConfig imageStorageConfig;
     private final UserRepository userRepository;
+    private final ProductVariationRepository productVariationRepository;
 
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
@@ -90,6 +90,30 @@ public class ImageService {
             }
         }
         throw new FileNotFoundException("User image not found!");
+    }
+
+    public ResponseEntity<Resource> getProductVariationImage(UUID productVariationId) throws IOException {
+
+        Optional<ProductVariation> productVariation = productVariationRepository.findById(productVariationId);
+
+        if(productVariation.isEmpty()) {
+            log.error("Product variation Id not found!");
+            throw new BadRequestException("Product variation Id not found!");
+        }
+
+        Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "product-variation");
+
+        for (String ext : allowedExtensions) {
+            Path path = directoryPath.resolve(productVariationId.toString() + "." + ext);
+            if (Files.exists(path)) {
+                Resource resource = new UrlResource(path.toUri());
+                MediaType mediaType = getMediaType(ext);
+                return ResponseEntity.ok()
+                        .contentType(mediaType)
+                        .body(resource);
+            }
+        }
+        throw new FileNotFoundException("Product variation image not found!");
     }
 
     private MediaType getMediaType(String extension) {
