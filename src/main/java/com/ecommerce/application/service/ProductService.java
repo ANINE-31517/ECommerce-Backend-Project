@@ -524,6 +524,36 @@ public class ProductService {
         return products.map(this::convertToCustomerProductViewVO);
     }
 
+    public Page<CustomerProductViewVO> similarCustomerProductView(UUID id, int offset, int max, String sort, String order, String query) {
+
+        if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
+            log.error("Invalid sort type is passed, choose among (name, brand, dateCreated)!");
+            throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid order type passed, choose either asc or desc!");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Product Id does not exists!"));
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<Product> products;
+        if (query != null && !query.isBlank()) {
+            products = productRepository.findAllByCategoryAndBrandAndIsActiveTrueAndIsDeletedFalseAndIdNotAndNameContainingIgnoreCase(product.getCategory(), product.getBrand(), id, query, pageable);
+        } else {
+            products = productRepository.findAllByCategoryAndBrandAndIsActiveTrueAndIsDeletedFalseAndIdNot(product.getCategory(), product.getBrand(), id, pageable);
+        }
+        log.info("Total similar products fetched under customer are: {}", products.getTotalElements());
+
+        return products.map(this::convertToCustomerProductViewVO);
+    }
+
     public AdminProductViewVO adminProductView(String id) {
 
         UUID productId;

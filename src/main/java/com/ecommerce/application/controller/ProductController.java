@@ -127,6 +127,20 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/customers/view-similar-product/{id}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<Page<CustomerProductViewVO>> similarCustomerProductView(
+            @PathVariable("id") UUID id,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<CustomerProductViewVO> response = productService.similarCustomerProductView(id, offset, max, sort, order, query);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/admin/activate-product/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> activateProduct(@PathVariable UUID id) {
