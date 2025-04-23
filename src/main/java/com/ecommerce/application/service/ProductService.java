@@ -402,7 +402,7 @@ public class ProductService {
             throw new BadRequestException("Logged in seller is not the creator of the product variation!");
         }
 
-        if (!allowedSortFields.contains(sort)) {
+        if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VARIATION_VIEW.contains(sort)) {
             log.error("Invalid sort type passed, choose among (price, dateCreated)!");
             throw new BadRequestException("Only 'price' and 'dateCreated' are allowed in sort field.");
         }
@@ -422,7 +422,7 @@ public class ProductService {
         } else {
             productVariations = productVariationRepository.findAllByProduct(pageable, product);
         }
-        log.info("Total categories fetched are: {}", productVariations.getTotalElements());
+        log.info("Total product variations fetched are: {}", productVariations.getTotalElements());
 
         return productVariations.map(this::convertToProductVariationViewVO);
     }
@@ -470,6 +470,34 @@ public class ProductService {
             );
         }
         return productVariationImageVOS;
+    }
+
+    public Page<AdminProductViewVO> adminAllProductView(int offset, int max, String sort, String order, String query) {
+
+        if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
+            log.error("Invalid sorting type passed, choose among (name, brand, dateCreated)!");
+            throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid ordering type is passed, choose either asc or desc!");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<Product> products;
+        if (query != null && !query.isBlank()) {
+            UUID uuid = UUID.fromString(query);
+            products = productRepository.findAllByCategoryIdOrSellerId(uuid, uuid, pageable);
+        } else {
+            products = productRepository.findAll(pageable);
+        }
+        log.info("Total products fetched are: {}", products.getTotalElements());
+
+        return products.map(this::convertToAdminProductViewVO);
     }
 
     public void activateProduct(UUID id) {

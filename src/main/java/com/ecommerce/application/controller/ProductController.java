@@ -128,4 +128,17 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/view-all-product")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Page<AdminProductViewVO>> adminAllProductView(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<AdminProductViewVO> response = productService.adminAllProductView(offset, max, sort, order, query);
+        return ResponseEntity.ok(response);
+    }
+
 }

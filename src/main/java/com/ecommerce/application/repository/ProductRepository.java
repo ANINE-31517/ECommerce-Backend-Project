@@ -15,4 +15,4 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsByNameAndBrandAndCategoryAndSeller(String name, String brand, Category category, Seller seller);
     Optional<Product> findByIdAndSellerIdAndIsDeletedFalse(UUID productId, UUID sellerId);
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
-}
+    Page<Product> findAllByCategoryIdOrSellerId(UUID categoryId, UUID sellerId, Pageable pageable);}
