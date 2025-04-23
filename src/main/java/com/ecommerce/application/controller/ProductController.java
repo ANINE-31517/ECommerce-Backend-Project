@@ -5,6 +5,7 @@ import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
 import com.ecommerce.application.VO.AdminProductViewVO;
+import com.ecommerce.application.VO.CustomerProductViewVO;
 import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
@@ -102,6 +103,13 @@ public class ProductController {
             @RequestParam(required = false) String query
     ) {
         Page<ProductVariationViewVO> response = productService.viewAllProductVariation(id, offset, max, sort, order, query);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/customers/view-product/{id}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<CustomerProductViewVO> customerProductView(@PathVariable String id) {
+        CustomerProductViewVO response = productService.customerProductView(id);
         return ResponseEntity.ok(response);
     }
 

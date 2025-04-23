@@ -427,6 +427,61 @@ public class ProductService {
         return productVariations.map(this::convertToProductVariationViewVO);
     }
 
+    public CustomerProductViewVO customerProductView(String id) {
+
+        UUID productId;
+        try {
+            productId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for product!");
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+
+        return convertToCustomerProductViewVO(product);
+    }
+
+    private CustomerProductViewVO convertToCustomerProductViewVO(Product product) {
+
+        return CustomerProductViewVO.builder()
+                .productId(product.getId())
+                .name(product.getName())
+                .brand(product.getBrand())
+                .active(product.isActive())
+                .category(CategoryViewSummaryVO.builder()
+                        .id(product.getCategory().getId())
+                        .name(product.getCategory().getName())
+                        .build())
+                .productVariations(convertToCustomerProductVariationViewVO(product))
+                .build();
+    }
+
+    private List<CustomerProductVariationViewVO> convertToCustomerProductVariationViewVO(Product product) {
+        List<CustomerProductVariationViewVO> customerProductVariationViewVOS = new ArrayList<>();
+        List<ProductVariation> productVariations = productVariationRepository.findByProduct(product);
+
+        for (ProductVariation productVariation : productVariations) {
+            List<String> secondaryImagesList = new ArrayList<>();
+
+            for (int i=1; i<productVariation.getImageCount(); i++) {
+                secondaryImagesList.add("http://localhost:8080/api/images/product-variation/secondary/" + productVariation.getId() + "(" + i + ")");
+            }
+            customerProductVariationViewVOS.add(
+                    CustomerProductVariationViewVO.builder()
+                            .id(productVariation.getId())
+                            .price(productVariation.getPrice())
+                            .quantityAvailable(productVariation.getQuantityAvailable())
+                            .metadata(productVariation.getMetadata())
+                            .isActive(productVariation.isActive())
+                            .primaryImage("http://localhost:8080/api/images/product-variation/" + productVariation.getId())
+                            .secondaryImages(secondaryImagesList)
+                            .build()
+            );
+        }
+        return customerProductVariationViewVOS;
+    }
+
     public AdminProductViewVO adminProductView(String id) {
 
         UUID productId;

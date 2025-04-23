@@ -40,4 +40,9 @@ public class ImageController {
     public ResponseEntity<Resource> getProductVariationImage(@PathVariable UUID productVariationId) throws IOException {
         return imageService.getProductVariationImage(productVariationId);
     }
+
+    @GetMapping("/product-variation/secondary/{name}")
+    public ResponseEntity<Resource> getProductVariationSecondaryImage(@PathVariable String name) throws IOException {
+        return imageService.getProductVariationSecondaryImage(name);
+    }
 }

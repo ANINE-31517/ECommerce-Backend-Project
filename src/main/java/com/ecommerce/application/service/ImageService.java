@@ -116,6 +116,23 @@ public class ImageService {
         throw new FileNotFoundException("Product variation image not found!");
     }
 
+    public ResponseEntity<Resource> getProductVariationSecondaryImage(String productVariationId) throws IOException {
+
+        Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "product-variation/secondary");
+
+        for (String ext : allowedExtensions) {
+            Path path = directoryPath.resolve(productVariationId + "." + ext);
+            if (Files.exists(path)) {
+                Resource resource = new UrlResource(path.toUri());
+                MediaType mediaType = getMediaType(ext);
+                return ResponseEntity.ok()
+                        .contentType(mediaType)
+                        .body(resource);
+            }
+        }
+        throw new FileNotFoundException("Product variation image not found!");
+    }
+
     private MediaType getMediaType(String extension) {
         return switch (extension) {
             case "png" -> MediaType.IMAGE_PNG;
@@ -143,7 +160,7 @@ public class ImageService {
     private String getProductVariationImagePath(UUID productVariationId, String extension, int imageCount) {
         if (imageCount == 0)
             return Paths.get(imageStorageConfig.getBasePath(), "product-variation", productVariationId.toString() + "." + extension).toString();
-        return Paths.get(imageStorageConfig.getBasePath(), "product-variation", productVariationId.toString() +"(" + imageCount + ")" + "." + extension).toString();
+        return Paths.get(imageStorageConfig.getBasePath(), "product-variation/secondary", productVariationId.toString() +"(" + imageCount + ")" + "." + extension).toString();
     }
 }
 
