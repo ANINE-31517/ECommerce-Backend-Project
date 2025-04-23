@@ -95,7 +95,7 @@ public class ProductController {
     @GetMapping("/sellers/view-all-product-variation/{id}")
     @PreAuthorize("hasAuthority('SELLER')")
     public ResponseEntity<Page<ProductVariationViewVO>> viewAllProductVariation(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int max,
             @RequestParam(defaultValue = "price") String sort,
@@ -110,6 +110,20 @@ public class ProductController {
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<CustomerProductViewVO> customerProductView(@PathVariable String id) {
         CustomerProductViewVO response = productService.customerProductView(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/customers/view-all-product/{id}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<Page<CustomerProductViewVO>> allCustomerProductView(
+            @PathVariable("id") UUID id,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int max,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false) String query
+    ) {
+        Page<CustomerProductViewVO> response = productService.allCustomerProductView(id, offset, max, sort, order, query);
         return ResponseEntity.ok(response);
     }
 

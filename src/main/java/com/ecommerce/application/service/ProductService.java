@@ -439,6 +439,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException("Product does not found!"));
 
+        if (product.isDeleted() || !product.isActive()) {
+            throw new BadRequestException("Product is either deleted or deActive!");
+        }
+
+        if (product.getProductVariations() == null || product.getProductVariations().isEmpty()) {
+            throw new BadRequestException("Product has no product variations!");
+        }
+
         return convertToCustomerProductViewVO(product);
     }
 
@@ -480,6 +488,40 @@ public class ProductService {
             );
         }
         return customerProductVariationViewVOS;
+    }
+
+    public Page<CustomerProductViewVO> allCustomerProductView(UUID id, int offset, int max, String sort, String order, String query) {
+
+        if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
+            log.error("Invalid sorting type is passed, choose among (name, brand, dateCreated)!");
+            throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");
+        }
+
+        if (!allowedOrderFields.contains(order)) {
+            log.error("Invalid ordering type passed, choose either asc or desc!");
+            throw new BadRequestException("Only 'asc' and 'desc' are allowed in order field.");
+        }
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Category Id does not exists!"));
+
+        if (categoryRepository.hasSubCategories(id)) {
+            throw new BadRequestException("Category passed is not a leaf category!");
+        }
+
+        Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(offset, max, sortOrder);
+
+        Page<Product> products;
+        if (query != null && !query.isBlank()) {
+            products = productRepository.findAllByCategoryAndIsActiveTrueAndIsDeletedFalseAndNameContainingIgnoreCase(category, query, pageable);
+        } else {
+            products = productRepository.findAllByCategoryAndIsActiveTrueAndIsDeletedFalse(category, pageable);
+        }
+        log.info("Total products fetched under customer are: {}", products.getTotalElements());
+
+        return products.map(this::convertToCustomerProductViewVO);
     }
 
     public AdminProductViewVO adminProductView(String id) {
@@ -545,7 +587,12 @@ public class ProductService {
 
         Page<Product> products;
         if (query != null && !query.isBlank()) {
-            UUID uuid = UUID.fromString(query);
+            UUID uuid;
+            try {
+                uuid = UUID.fromString(query);
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException("Invalid UUID for product!");
+            }
             products = productRepository.findAllByCategoryIdOrSellerId(uuid, uuid, pageable);
         } else {
             products = productRepository.findAll(pageable);
