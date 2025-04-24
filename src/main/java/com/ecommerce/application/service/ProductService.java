@@ -3,6 +3,7 @@ package com.ecommerce.application.service;
 import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
+import com.ecommerce.application.CO.UpdateProductVariationCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.AdminConstant;
@@ -425,6 +426,123 @@ public class ProductService {
         log.info("Total product variations fetched are: {}", productVariations.getTotalElements());
 
         return productVariations.map(this::convertToProductVariationViewVO);
+    }
+
+    @Transactional
+    public void updateProductVariation(UpdateProductVariationCO request,
+                                       MultipartFile primaryImage,
+                                       List<MultipartFile> secondaryImages) throws IOException {
+        User user = SecurityUtil.getCurrentUser();
+
+        if (!(user instanceof Seller seller)) {
+            log.warn("User logged in via emailId: {} is not a seller!", user.getEmail());
+            throw new BadRequestException("Only sellers can delete products");
+        }
+
+        String id = request.getProductVariationId().trim();
+        UUID productVariationId;
+        try {
+            productVariationId = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid UUID for product!");
+        }
+
+        ProductVariation productVariation = productVariationRepository.findById(productVariationId)
+                .orElseThrow(() -> new BadRequestException("Product variation not found!"));
+
+        Optional<Product> optionalProduct = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productVariation.getProduct().getId(), seller.getId());
+
+        if (optionalProduct.isEmpty()) {
+            throw new BadRequestException("Product is either deleted or does not belong to the logged in seller!");
+        }
+
+        Product product = optionalProduct.get();
+
+        if (!product.isActive()) {
+            throw new BadRequestException("Product is not active!");
+        }
+
+        if (request.getQuantityAvailable() != null)
+            productVariation.setQuantityAvailable(request.getQuantityAvailable());
+
+        if (request.getPrice() != null)
+            productVariation.setPrice(request.getPrice());
+
+        if (request.getIsActive() != null)
+            productVariation.setActive(request.getIsActive());
+
+        if (request.getMetadata() != null && !request.getMetadata().isBlank()) {
+            Category category = product.getCategory();
+            List<CategoryMetaDataFieldValue> allowedFieldValues = categoryMetaDataFieldValueRepository.findByCategory(category);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> metadataMap;
+            try {
+                metadataMap = objectMapper.readValue(request.getMetadata(), new TypeReference<Map<String, String>>() {});
+            } catch (JsonProcessingException e) {
+                throw new BadRequestException("Metadata is not appropriate!");
+            }
+
+            Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
+
+            for (CategoryMetaDataFieldValue cmv : allowedFieldValues) {
+                Set<String> filedValues = Arrays.stream(cmv.getFieldValues().split(","))
+                        .map(String::trim)
+                        .collect(Collectors.toSet());
+
+                fieldAllowedMap.put(
+                        cmv.getCategoryMetaDataField().getName(),
+                        filedValues
+                );
+            }
+
+            for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
+                String field = entry.getKey().toLowerCase();
+                String value = entry.getValue().trim();
+                Set<String> allowedValues = fieldAllowedMap.get(field);
+
+                if (allowedValues == null || !allowedValues.contains(value)) {
+                    throw new BadRequestException("Invalid value for metadata field: " + field + "!");
+                }
+            }
+
+            List<ProductVariation> existingVariations = productVariationRepository.findByProduct(product);
+
+            if (!existingVariations.isEmpty()) {
+                Set<String> currentKeys = new HashSet<>(metadataMap.keySet());
+
+                String existingMetadataJson = existingVariations.getFirst().getMetadata();
+                Map<String, String> existingMetadataMap = objectMapper.readValue(existingMetadataJson, new TypeReference<Map<String, String>>() {});
+                Set<String> existingKeys = new HashSet<>(existingMetadataMap.keySet());
+
+                if (!currentKeys.equals(existingKeys)) {
+                    throw new BadRequestException("Metadata structure doesn't match existing variations of this product.");
+                }
+            }
+
+            productVariation.setMetadata(objectMapper.writeValueAsString(metadataMap));
+        }
+
+        if (primaryImage != null && !primaryImage.isEmpty()) {
+            imageService.deleteExistingPrimaryImage(productVariationId);
+            imageService.downloadAndStoreImageFromUrl(primaryImage, productVariationId, 0);
+            String extension = FilenameUtils.getExtension(primaryImage.getOriginalFilename());
+            String primaryImageName = productVariationId + "." + extension;
+            productVariation.setPrimaryImageName(primaryImageName);
+        }
+
+        if (!secondaryImages.isEmpty()) {
+            int imageCount = productVariation.getImageCount();
+            for (MultipartFile secondaryImage: secondaryImages) {
+                imageService.downloadAndStoreImageFromUrl(secondaryImage, productVariationId, imageCount);
+                imageCount +=1;
+            }
+            productVariation.setImageCount(imageCount);
+        }
+
+        productVariationRepository.save(productVariation);
+
+        log.info("Product variation updated under the seller: {}", seller.getEmail());
     }
 
     public CustomerProductViewVO customerProductView(String id) {

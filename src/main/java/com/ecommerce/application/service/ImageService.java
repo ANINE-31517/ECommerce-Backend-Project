@@ -162,5 +162,25 @@ public class ImageService {
             return Paths.get(imageStorageConfig.getBasePath(), "product-variation", productVariationId.toString() + "." + extension).toString();
         return Paths.get(imageStorageConfig.getBasePath(), "product-variation/secondary", productVariationId.toString() +"(" + imageCount + ")" + "." + extension).toString();
     }
+
+    public void deleteExistingPrimaryImage(UUID productVariationId) {
+        File folder = new File(Paths.get(imageStorageConfig.getBasePath(), "product-variation").toString());
+
+        File[] matchingFiles = folder.listFiles((dir, name) ->
+                name.startsWith(productVariationId.toString() + "."));
+
+        if (matchingFiles != null && matchingFiles.length > 0) {
+            File oldImage = matchingFiles[0];
+            if (oldImage.delete()) {
+                log.info("Deleted old primary image: {}", oldImage.getName());
+            } else {
+                log.warn("Failed to delete old primary image: {}", oldImage.getName());
+            }
+        }
+        else {
+            log.warn("No matching files found!");
+        }
+    }
+
 }
 

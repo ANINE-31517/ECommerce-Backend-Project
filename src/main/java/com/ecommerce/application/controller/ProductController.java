@@ -4,11 +4,13 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.ProductAddCO;
 import com.ecommerce.application.CO.ProductVariationAddCO;
 import com.ecommerce.application.CO.UpdateProductCO;
+import com.ecommerce.application.CO.UpdateProductVariationCO;
 import com.ecommerce.application.VO.AdminProductViewVO;
 import com.ecommerce.application.VO.CustomerProductViewVO;
 import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -104,6 +106,16 @@ public class ProductController {
     ) {
         Page<ProductVariationViewVO> response = productService.viewAllProductVariation(id, offset, max, sort, order, query);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/sellers/update-product-variation")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> updateProductVariation(@Valid @ModelAttribute UpdateProductVariationCO request,
+                                                         @RequestParam("primaryImageName") MultipartFile primaryImage,
+                                                         @RequestParam(value = "secondaryImageName[]", required = false) List<MultipartFile> secondaryImages) throws IOException {
+        productService.updateProductVariation(request, primaryImage, secondaryImages);
+        String message = messageSource.getMessage("product.variation.update.success", null, LocaleContextHolder.getLocale());
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping("/customers/view-product/{id}")
