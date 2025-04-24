@@ -391,7 +391,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+                .orElseThrow(() -> new BadRequestException("Product did not found!"));
 
         if (!product.isActive() || product.isDeleted()) {
             log.warn("Product id: {} is either not active or is deleted!", product.getId());
@@ -486,13 +486,13 @@ public class ProductService {
             Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
 
             for (CategoryMetaDataFieldValue cmv : allowedFieldValues) {
-                Set<String> filedValues = Arrays.stream(cmv.getFieldValues().split(","))
+                Set<String> fieldValues = Arrays.stream(cmv.getFieldValues().split(","))
                         .map(String::trim)
                         .collect(Collectors.toSet());
 
                 fieldAllowedMap.put(
                         cmv.getCategoryMetaDataField().getName(),
-                        filedValues
+                        fieldValues
                 );
             }
 

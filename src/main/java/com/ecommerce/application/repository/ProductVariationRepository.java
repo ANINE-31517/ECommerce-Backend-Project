@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface ProductVariationRepository extends JpaRepository<ProductVariation, UUID> {
 
     List<ProductVariation> findByProduct(Product product);
+    List<ProductVariation> findByProductIn(List<Product> products);
     Page<ProductVariation> findAllByProduct(Pageable pageable, Product product);
     Page<ProductVariation> findAllByMetadataContainingIgnoreCaseAndProduct(String query, Product product, Pageable pageable);
 }

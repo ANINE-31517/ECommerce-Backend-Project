@@ -7,12 +7,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByNameAndBrandAndCategoryAndSeller(String name, String brand, Category category, Seller seller);
+    List<Product> findAllByCategoryIdIn(List<UUID> categoryIds);
     Optional<Product> findByIdAndSellerIdAndIsDeletedFalse(UUID productId, UUID sellerId);
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Product> findAllByCategoryIdOrSellerId(UUID categoryId, UUID sellerId, Pageable pageable);

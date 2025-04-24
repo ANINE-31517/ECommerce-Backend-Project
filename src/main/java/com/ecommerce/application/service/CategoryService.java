@@ -1,19 +1,12 @@
 package com.ecommerce.application.service;
 
-import com.ecommerce.application.CO.CategoryCO;
-import com.ecommerce.application.CO.CategoryMetaDataFieldValueCO;
-import com.ecommerce.application.CO.MetaDataFieldValueCO;
-import com.ecommerce.application.CO.UpdateCategoryCO;
+import com.ecommerce.application.CO.*;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.constant.CategoryConstant;
-import com.ecommerce.application.entity.Category;
-import com.ecommerce.application.entity.CategoryMetaDataField;
-import com.ecommerce.application.entity.CategoryMetaDataFieldValue;
+import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.ResourceNotFoundException;
-import com.ecommerce.application.repository.CategoryMetaDataFieldRepository;
-import com.ecommerce.application.repository.CategoryMetaDataFieldValueRepository;
-import com.ecommerce.application.repository.CategoryRepository;
+import com.ecommerce.application.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +28,8 @@ public class CategoryService {
     private final CategoryMetaDataFieldRepository categoryMetadataFieldRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryMetaDataFieldValueRepository categoryMetaDataFieldValueRepository;
+    private final ProductRepository productRepository;
+    private final ProductVariationRepository productVariationRepository;
 
 
     private static final List<String> allowedSortFields = CategoryConstant.ALLOWED_SORT_FIELDS;
@@ -470,8 +465,70 @@ public class CategoryService {
                     .name(cat.getName())
                     .build());
         }
-
         return result;
+    }
+
+    public CategoryFilterDetailsVO getFilteringDetails(UUID id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Invalid category ID"));
+
+        List<CategoryMetaDataFieldValue> allowedFieldValues = categoryMetaDataFieldValueRepository.findByCategory(category);
+        Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
+
+        for (CategoryMetaDataFieldValue cmv : allowedFieldValues) {
+            Set<String> fieldValues = Arrays.stream(cmv.getFieldValues().split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            fieldAllowedMap.put(
+                    cmv.getCategoryMetaDataField().getName(),
+                    fieldValues
+            );
+        }
+
+        List<UUID> leafCategoryIds = getAllLeafCategoryIds(category);
+
+        List<Product> products = productRepository.findAllByCategoryIdIn(leafCategoryIds);
+
+        Set<String> brands = products.stream()
+                .map(Product::getBrand)
+                .collect(Collectors.toSet());
+
+        Double minPrice = Double.MAX_VALUE, maxPrice = 0.0;
+        List<ProductVariation> productVariations = productVariationRepository.findByProductIn(products);
+        for (ProductVariation variation : productVariations) {
+            if (variation.isActive()) {
+                double price = variation.getPrice();
+                minPrice = Math.min(minPrice, price);
+                maxPrice = Math.max(maxPrice, price);
+            }
+        }
+
+        if (products.isEmpty() || minPrice == Double.MAX_VALUE) {
+            minPrice = 0.0;
+            maxPrice = 0.0;
+        }
+
+        return CategoryFilterDetailsVO.builder()
+                .metadataFields(fieldAllowedMap)
+                .brands(brands)
+                .maxPrice(maxPrice)
+                .minPrice(minPrice)
+                .build();
+    }
+
+    private List<UUID> getAllLeafCategoryIds(Category category) {
+        List<UUID> leafCategoryIds = new ArrayList<>();
+
+        if (!categoryRepository.hasSubCategories(category.getId())) {
+            leafCategoryIds.add(category.getId());
+        } else {
+            for (Category subCategory : category.getSubCategories()) {
+                leafCategoryIds.addAll(getAllLeafCategoryIds(subCategory));
+            }
+        }
+
+        return leafCategoryIds;
     }
 
 }

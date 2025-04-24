@@ -1,9 +1,6 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.CO.CategoryCO;
-import com.ecommerce.application.CO.CategoryMetaDataFieldValueCO;
-import com.ecommerce.application.CO.CategoryMetadataFieldCO;
-import com.ecommerce.application.CO.UpdateCategoryCO;
+import com.ecommerce.application.CO.*;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.service.CategoryService;
 import jakarta.validation.Valid;
@@ -16,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/category")
@@ -106,6 +104,13 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<List<CategoryViewSummaryVO>> viewAllCustomerCategory(@RequestParam(required = false) String categoryId) {
         List<CategoryViewSummaryVO> response = categoryService.viewAllCustomerCategory(categoryId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/customers/filtering-details/{id}")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<CategoryFilterDetailsVO> getCategoryFilteringDetails(@PathVariable UUID id) {
+        CategoryFilterDetailsVO response = categoryService.getFilteringDetails(id);
         return ResponseEntity.ok(response);
     }
 
