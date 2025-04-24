@@ -1,5 +1,6 @@
 package com.ecommerce.application.entity;
 
+import com.ecommerce.application.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Token {
+public class Token extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
