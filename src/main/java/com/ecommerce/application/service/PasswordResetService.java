@@ -5,6 +5,7 @@ import com.ecommerce.application.CO.ResetPasswordCO;
 import com.ecommerce.application.entity.PasswordResetToken;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.repository.PasswordResetTokenRepository;
 import com.ecommerce.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -29,7 +30,7 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${token.time}")
+    @Value("${reset.password.token.time}")
     private Integer tokenTime;
 
     @Transactional
@@ -38,7 +39,7 @@ public class PasswordResetService {
 
         if (user == null) {
             log.error("Password reset failed. Email not found: {}", request.getEmail());
-            throw new BadRequestException("Email does not exist.");
+            throw new ResourceNotFoundException("Email does not exist.");
         }
 
         if (!user.isActive()) {
@@ -52,7 +53,7 @@ public class PasswordResetService {
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
-        resetToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
+        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(tokenTime));
         tokenRepository.save(resetToken);
 
         String resetLink = "http://localhost:8080/api/reset/forgot-password?token=" + token;

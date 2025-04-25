@@ -5,6 +5,7 @@ import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.ProductVariation;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.repository.ProductVariationRepository;
 import com.ecommerce.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class ImageService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if(userOpt.isEmpty()) {
-            throw new BadRequestException("User Id not found!");
+            throw new ResourceNotFoundException("User Id not found!");
         }
 
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -74,7 +75,7 @@ public class ImageService {
 
         if(userOpt.isEmpty()) {
             log.error("User Id not found!");
-            throw new BadRequestException("User Id not found!");
+            throw new ResourceNotFoundException("User Id not found!");
         }
 
         Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "users");
@@ -98,7 +99,7 @@ public class ImageService {
 
         if(productVariation.isEmpty()) {
             log.error("Product variation Id not found!");
-            throw new BadRequestException("Product variation Id not found!");
+            throw new ResourceNotFoundException("Product variation Id not found!");
         }
 
         Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "product-variation");

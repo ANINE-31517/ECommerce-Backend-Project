@@ -6,13 +6,15 @@ import com.ecommerce.application.CO.SellerRegistrationCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.ImageConstant;
-import com.ecommerce.application.constant.SellerConstant;
+import com.ecommerce.application.constant.UserConstant;
 import com.ecommerce.application.entity.Address;
 import com.ecommerce.application.entity.Role;
 import com.ecommerce.application.entity.Seller;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.enums.RoleEnum;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.SellerRepository;
 import com.ecommerce.application.repository.UserRepository;
 import com.ecommerce.application.security.SecurityUtil;
@@ -30,7 +32,6 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,7 +93,6 @@ public class SellerService {
         seller.setFirstName(request.getFirstName());
         seller.setLastName(request.getLastName());
         seller.setActive(false);
-        seller.setCreatedAt(LocalDateTime.now());
 
         seller.setRoles(new Role(RoleEnum.SELLER));
 
@@ -186,10 +186,10 @@ public class SellerService {
     public Page<SellerRegisteredVO> getAllSellers(int pageOffset, int pageSize, String sortBy, String email) {
         log.info("Fetching sellers - pageOffset: {}, pageSize: {}, sortBy: {}, emailFilter: {}", pageOffset, pageSize, sortBy, email);
 
-        List<String> allowedSortFields = SellerConstant.ALLOWED_SORT_FIELDS;
+        List<String> allowedSortFields = UserConstant.ALLOWED_SORT_FIELDS;
 
         if (!allowedSortFields.contains(sortBy)) {
-            log.error("Invalid sort type is passed, choose among (id, email, createdAt)");
+            log.error("Invalid sort type is passed, choose among (dateCreated)");
             throw new BadRequestException("Invalid Sort Type");
         }
 
@@ -223,7 +223,7 @@ public class SellerService {
 
         if (sellerOptional.isEmpty()) {
             log.error("Seller Id not found!");
-            throw new BadRequestException("Seller ID not found!");
+            throw new ResourceNotFoundException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
@@ -251,7 +251,7 @@ public class SellerService {
 
         if (sellerOptional.isEmpty()) {
             log.error("Seller id not found!");
-            throw new BadRequestException("Seller ID not found!");
+            throw new ResourceNotFoundException("Seller ID not found!");
         }
 
         Seller seller = sellerOptional.get();
@@ -279,19 +279,18 @@ public class SellerService {
 
         if (!(user instanceof Seller)) {
             log.error("User with email {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Current user is not a seller!");
+            throw new UnauthorizedException("Current user is not a seller!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
 
         if (optionalSeller.isEmpty()) {
             log.error("Seller not found!");
-            throw new BadRequestException("Seller not found!");
+            throw new ResourceNotFoundException("Seller not found!");
         }
 
         Seller seller = optionalSeller.get();
         return convertToSellerProfileVO(seller);
-
     }
 
     private SellerProfileVO convertToSellerProfileVO(Seller seller) {
@@ -324,14 +323,14 @@ public class SellerService {
 
         if (!(user instanceof Seller)) {
             log.error("User with the email {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Current user is not a seller!");
+            throw new UnauthorizedException("Current user is not a seller!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
 
         if (optionalSeller.isEmpty()) {
             log.error("Seller does not found!");
-            throw new BadRequestException("Seller not found!");
+            throw new ResourceNotFoundException("Seller not found!");
         }
 
         Seller seller = optionalSeller.get();

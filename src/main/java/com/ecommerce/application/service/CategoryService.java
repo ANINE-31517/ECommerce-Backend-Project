@@ -56,9 +56,9 @@ public class CategoryService {
 
     public Page<CategoryMetaDataFieldListVO> getAllFields(int offset, int max, String sort, String order, String query) {
 
-        if (!allowedSortFields.contains(sort)) {
+        if (!CategoryConstant.ALLOWED_SORT_METADATA_FIELDS.contains(sort)) {
             log.error("Invalid sort type is passed, choose among (name, dateCreated)");
-            throw new BadRequestException("Only 'name' and 'createdAt' are allowed in sort field.");
+            throw new BadRequestException("Only 'name' and 'dateCreated' are allowed in sort field.");
         }
 
         if (!allowedOrderFields.contains(order)) {
@@ -103,7 +103,7 @@ public class CategoryService {
             }
 
             parentCategory = categoryRepository.findById(parentId)
-                    .orElseThrow(() -> new BadRequestException("Parent category does not found!"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent category does not found!"));
         }
 
         if (!isNameUniqueInHierarchy(request.getName(), parentCategory)) {
@@ -245,7 +245,7 @@ public class CategoryService {
         }
 
         Category category  = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BadRequestException("Category does not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category does not found!"));
 
         if (name.equalsIgnoreCase(category.getName())) {
             throw new BadRequestException("Same name provided!");
@@ -281,9 +281,9 @@ public class CategoryService {
         }
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category does not found!"));
 
-        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+        if (categoryRepository.hasSubCategories(category.getId())) {
             throw new BadRequestException("Metadata can only be added to a leaf category (no subcategories)");
         }
 
@@ -333,7 +333,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+        if (categoryRepository.hasSubCategories(category.getId())) {
             throw new BadRequestException("Metadata can only be updated for a leaf category (no subcategories)");
         }
 
@@ -346,13 +346,13 @@ public class CategoryService {
             }
 
             CategoryMetaDataField field = categoryMetadataFieldRepository.findById(fieldId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Metadata Field not found!"));
 
             Optional<CategoryMetaDataFieldValue> existingOptional =
                     categoryMetaDataFieldValueRepository.findByCategoryAndCategoryMetaDataField(category, field);
 
             if (existingOptional.isEmpty()) {
-                throw new BadRequestException("Metadata Field is not associated with the given Category");
+                throw new ResourceNotFoundException("Metadata Field is not associated with the given Category");
             }
 
             CategoryMetaDataFieldValue existing = existingOptional.get();
@@ -470,7 +470,7 @@ public class CategoryService {
 
     public CategoryFilterDetailsVO getFilteringDetails(UUID id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Invalid category ID"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid category ID"));
 
         List<CategoryMetaDataFieldValue> allowedFieldValues = categoryMetaDataFieldValueRepository.findByCategory(category);
         Map<String, Set<String>> fieldAllowedMap = new HashMap<>();

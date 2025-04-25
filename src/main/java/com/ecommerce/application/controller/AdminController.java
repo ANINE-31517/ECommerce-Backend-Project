@@ -40,7 +40,7 @@ public class AdminController {
     public ResponseEntity<Page<CustomerRegisteredVO>> getAllCustomers(
             @RequestParam(defaultValue = "0") int pageOffset,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "dateCreated") String sortBy,
             @RequestParam(required = false) String email
     ) {
         Page<CustomerRegisteredVO> customers = customerService.getAllCustomers(pageOffset, pageSize, sortBy, email);
@@ -52,7 +52,7 @@ public class AdminController {
     public ResponseEntity<Page<SellerRegisteredVO>> getAllSellers(
             @RequestParam(defaultValue = "0") int pageOffset,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "dateCreated") String sortBy,
             @RequestParam(required = false) String email
     ) {
         Page<SellerRegisteredVO> sellers = sellerService.getAllSellers(pageOffset, pageSize, sortBy, email);

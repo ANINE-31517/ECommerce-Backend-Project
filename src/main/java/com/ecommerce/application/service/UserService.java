@@ -45,7 +45,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findById(user.getId());
         if(userOptional.isEmpty()) {
             log.error("Password update failed: User not found for ID: {}", user.getId());
-            throw new BadRequestException("User not found!");
+            throw new ResourceNotFoundException("User not found!");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -124,7 +124,7 @@ public class UserService {
         );
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
 
         if (user.isLocked()) {
             log.info("User Account with email: {} is locked!", user.getEmail());
@@ -177,7 +177,7 @@ public class UserService {
 
         if (request == null || !request.startsWith("Bearer ")) {
             log.warn("Access token is missing or invalid format!");
-            throw new BadRequestException("Access token is missing or invalid format!");
+            throw new UnauthorizedException("Access token is missing or invalid format!");
         }
 
         String token = request.substring(7);

@@ -10,7 +10,6 @@ import com.ecommerce.application.VO.CustomerProductViewVO;
 import com.ecommerce.application.VO.ProductVariationViewVO;
 import com.ecommerce.application.VO.ProductViewVO;
 import com.ecommerce.application.service.ProductService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;

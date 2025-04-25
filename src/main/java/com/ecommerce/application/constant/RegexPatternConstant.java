@@ -10,5 +10,5 @@ public class RegexPatternConstant {
     public static final String PASSWORD_LOWERCASE = ".*[a-z].*";
     public static final String PASSWORD_DIGIT = ".*\\d.*";
     public static final String PASSWORD_SPECIAL_CHAR = ".*[\\W_].*";
-
+    public static final String PASSWORD_LENGTH = "^.{8,15}$";
 }

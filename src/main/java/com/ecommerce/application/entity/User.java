@@ -44,7 +44,6 @@ public class User extends Auditable implements UserDetails {
     private boolean isLocked = false;
     private int invalidAttemptCount = 0;
     private LocalDateTime passwordUpdateDate;
-    private LocalDateTime createdAt;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id")

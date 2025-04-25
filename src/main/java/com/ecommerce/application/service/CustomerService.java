@@ -5,10 +5,11 @@ import com.ecommerce.application.CO.CustomerProfileUpdateCO;
 import com.ecommerce.application.CO.CustomerRegistrationCO;
 import com.ecommerce.application.VO.*;
 import com.ecommerce.application.config.ImageStorageConfig;
-import com.ecommerce.application.constant.CustomerConstant;
+import com.ecommerce.application.constant.UserConstant;
 import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.enums.RoleEnum;
+import com.ecommerce.application.exception.AccessDeniedException;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.exception.UnauthorizedException;
@@ -73,7 +74,6 @@ public class CustomerService {
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
         customer.setActive(false);
         customer.setContact(request.getContact());
-        customer.setCreatedAt(LocalDateTime.now());
         customer.setRoles(new Role(RoleEnum.CUSTOMER));
 
         customerRepository.save(customer);
@@ -162,10 +162,10 @@ public class CustomerService {
 //    }
 
     public Page<CustomerRegisteredVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
-        List<String> allowedSortFields = CustomerConstant.ALLOWED_SORT_FIELDS;
+        List<String> allowedSortFields = UserConstant.ALLOWED_SORT_FIELDS;
 
         if(!allowedSortFields.contains(sortBy)) {
-            log.error("Invalid sort type is passed, choose among (id, email, createdAt)");
+            log.error("Invalid sort type is passed, choose among (dateCreated)");
             throw new BadRequestException("Invalid Sort Type");
         }
 
@@ -196,7 +196,7 @@ public class CustomerService {
 
         if (customerOptional.isEmpty()) {
             log.error("Customer with Id: {} not found!", customerId);
-            throw new BadRequestException("Customer ID not found!");
+            throw new ResourceNotFoundException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
@@ -224,7 +224,7 @@ public class CustomerService {
 
         if (customerOptional.isEmpty()) {
             log.error("Customer with the Id: {} not found!", customerId);
-            throw new BadRequestException("Customer ID not found!");
+            throw new ResourceNotFoundException("Customer ID not found!");
         }
 
         Customer customer = customerOptional.get();
@@ -259,7 +259,7 @@ public class CustomerService {
 
         if (optionalCustomer.isEmpty()) {
             log.error("Customer with the email: {} not found!", user.getEmail());
-            throw new BadRequestException("Customer not found!");
+            throw new ResourceNotFoundException("Customer not found!");
         }
 
         Customer customer = optionalCustomer.get();
@@ -300,7 +300,7 @@ public class CustomerService {
 
         if (optionalCustomer.isEmpty()) {
             log.error("Customer with the emailId: {} not found!", user.getEmail());
-            throw new BadRequestException("Customer not found!");
+            throw new ResourceNotFoundException("Customer not found!");
         }
 
         Customer customer = optionalCustomer.get();
@@ -382,7 +382,7 @@ public class CustomerService {
 
         if (userAddresses.size() <= 1) {
             log.error("Can not delete the default address!");
-            throw new BadRequestException("Cannot delete the default address.");
+            throw new AccessDeniedException("Cannot delete the default address.");
         }
 
         Address address = addressRepository.findById(addressId)

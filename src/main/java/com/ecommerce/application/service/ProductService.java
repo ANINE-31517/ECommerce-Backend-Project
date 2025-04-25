@@ -11,6 +11,9 @@ import com.ecommerce.application.constant.CategoryConstant;
 import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.*;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.InternalServerException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
+import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.*;
 import com.ecommerce.application.security.SecurityUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,13 +60,13 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller)) {
             log.warn("User with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can add products!");
+            throw new UnauthorizedException("Only sellers can add products!");
         }
 
         Optional<Seller> optionalSeller = sellerRepository.findById(user.getId());
         if (optionalSeller.isEmpty()) {
             log.error("Seller with the emailId: {} not found!", user.getEmail());
-            throw new BadRequestException("Seller not found!");
+            throw new ResourceNotFoundException("Seller not found!");
         }
 
         Seller seller = optionalSeller.get();
@@ -76,9 +79,9 @@ public class ProductService {
         }
 
         Category category = categoryRepository.findById(fieldId)
-                .orElseThrow(() -> new BadRequestException("Invalid category ID!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid category ID!"));
 
-        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+        if (categoryRepository.hasSubCategories(category.getId())) {
             log.error("Product can only be added to a leaf category!");
             throw new BadRequestException("Product can only be added to a leaf category!");
         }
@@ -117,11 +120,11 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller seller)) {
             log.warn("User logged in with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can add products!");
+            throw new UnauthorizedException("Only sellers can add products!");
         }
 
         Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
-                .orElseThrow(() -> new BadRequestException("Product does not found or does not belong to the current seller!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product does not found or does not belong to the current seller!"));
 
         return convertToProductViewVO(product);
     }
@@ -172,11 +175,11 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller seller)) {
             log.warn("User logged in by the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can delete products");
+            throw new UnauthorizedException("Only sellers can delete products");
         }
 
         Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
-                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to the current seller!"));
 
         product.setDeleted(true);
         productRepository.save(product);
@@ -189,7 +192,7 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller seller)) {
             log.warn("Logged in user by the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can delete products");
+            throw new UnauthorizedException("Only sellers can delete products");
         }
 
         String id = request.getId().trim();
@@ -201,7 +204,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productId, seller.getId())
-                .orElseThrow(() -> new BadRequestException("Product not found or does not belong to the current seller!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to the current seller!"));
 
         if (request.getName() != null && !request.getName().isBlank() && !request.getName().equals(product.getName())) {
             boolean exists = productRepository.existsByNameAndBrandAndCategoryAndSeller(
@@ -235,7 +238,7 @@ public class ProductService {
         User user = SecurityUtil.getCurrentUser();
         if (!(user instanceof Seller)) {
             log.warn("Unauthorized user attempting product variation add: {}", user.getEmail());
-            throw new BadRequestException("Only sellers can add product variations.");
+            throw new UnauthorizedException("Only sellers can add product variations.");
         }
 
         String id = request.getProductId().trim();
@@ -247,7 +250,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BadRequestException("Product Id not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product Id not found!"));
 
         if (!product.isActive() || product.isDeleted()) {
             throw new BadRequestException("Product is either not active or is deleted!");
@@ -261,7 +264,7 @@ public class ProductService {
         try {
             metadataMap = objectMapper.readValue(request.getMetadata(), new TypeReference<Map<String, String>>() {});
         } catch (JsonProcessingException e) {
-            throw new BadRequestException("Metadata is not appropriate!");
+            throw new InternalServerException("Metadata is not appropriate!");
         }
 
         Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
@@ -339,11 +342,11 @@ public class ProductService {
 
         if (!(user instanceof Seller seller)) {
             log.warn("Logged in user with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Sellers are authorized to view product variation!");
+            throw new UnauthorizedException("Sellers are authorized to view product variation!");
         }
 
         ProductVariation productVariation = productVariationRepository.findById(productVariationId)
-                .orElseThrow(() -> new BadRequestException("Product variation does not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product variation does not found!"));
 
         Product product = productVariation.getProduct();
 
@@ -387,11 +390,11 @@ public class ProductService {
 
         if (!(user instanceof Seller seller)) {
             log.warn("LoggedIn user with the emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Sellers are authorized to view product variation!");
+            throw new UnauthorizedException("Sellers are authorized to view product variation!");
         }
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Product did not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product did not found!"));
 
         if (!product.isActive() || product.isDeleted()) {
             log.warn("Product id: {} is either not active or is deleted!", product.getId());
@@ -436,7 +439,7 @@ public class ProductService {
 
         if (!(user instanceof Seller seller)) {
             log.warn("User logged in via emailId: {} is not a seller!", user.getEmail());
-            throw new BadRequestException("Only sellers can delete products");
+            throw new UnauthorizedException("Only sellers can delete products");
         }
 
         String id = request.getProductVariationId().trim();
@@ -448,12 +451,12 @@ public class ProductService {
         }
 
         ProductVariation productVariation = productVariationRepository.findById(productVariationId)
-                .orElseThrow(() -> new BadRequestException("Product variation not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product variation not found!"));
 
         Optional<Product> optionalProduct = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productVariation.getProduct().getId(), seller.getId());
 
         if (optionalProduct.isEmpty()) {
-            throw new BadRequestException("Product is either deleted or does not belong to the logged in seller!");
+            throw new ResourceNotFoundException("Product is either deleted or does not belong to the logged in seller!");
         }
 
         Product product = optionalProduct.get();
@@ -480,7 +483,7 @@ public class ProductService {
             try {
                 metadataMap = objectMapper.readValue(request.getMetadata(), new TypeReference<Map<String, String>>() {});
             } catch (JsonProcessingException e) {
-                throw new BadRequestException("Metadata is not appropriate!");
+                throw new InternalServerException("Metadata is not appropriate!");
             }
 
             Map<String, Set<String>> fieldAllowedMap = new HashMap<>();
@@ -555,7 +558,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product does not found!"));
 
         if (product.isDeleted() || !product.isActive()) {
             throw new BadRequestException("Product is either deleted or deActive!");
@@ -621,7 +624,7 @@ public class ProductService {
         }
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Category Id does not exists!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category Id does not exists!"));
 
         if (categoryRepository.hasSubCategories(id)) {
             throw new BadRequestException("Category passed is not a leaf category!");
@@ -655,7 +658,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Product Id does not exists!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product Id does not exists!"));
 
         Sort sortOrder = order.equalsIgnoreCase("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending();
 
@@ -682,7 +685,7 @@ public class ProductService {
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BadRequestException("Product does not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product does not found!"));
 
         return convertToAdminProductViewVO(product);
     }
@@ -752,7 +755,7 @@ public class ProductService {
 
     public void activateProduct(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Product does not found with the given id!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product does not found with the given id!"));
 
         if (product.isActive()) {
             throw new BadRequestException("Product is already activated by the admin!");
@@ -774,7 +777,7 @@ public class ProductService {
 
     public void deActivateProduct(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Product does not found with the given id!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product does not found with the given id!"));
 
         if (!product.isActive()) {
             throw new BadRequestException("Product is already not active or has been deActivated by the admin!");

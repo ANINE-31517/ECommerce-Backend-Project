@@ -5,6 +5,7 @@ import com.ecommerce.application.VO.NewAccessTokenVO;
 import com.ecommerce.application.entity.Token;
 import com.ecommerce.application.entity.User;
 import com.ecommerce.application.exception.BadRequestException;
+import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.TokenRepository;
 import jakarta.transaction.Transactional;
@@ -54,7 +55,7 @@ public class TokenService {
 
     public void invalidateToken(String accessToken) {
         Token token = tokenRepository.findByAccessToken(accessToken)
-                .orElseThrow(() -> new BadRequestException("Token not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
 
         token.setAccessTokenInvalidated(true);
         token.setRefreshTokenInvalidated(true);
