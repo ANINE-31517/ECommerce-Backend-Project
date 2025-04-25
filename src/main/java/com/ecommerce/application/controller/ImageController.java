@@ -2,7 +2,6 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.service.ImageService;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.message.Message;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;

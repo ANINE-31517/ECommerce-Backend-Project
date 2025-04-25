@@ -456,12 +456,14 @@ public class ProductService {
         Optional<Product> optionalProduct = productRepository.findByIdAndSellerIdAndIsDeletedFalse(productVariation.getProduct().getId(), seller.getId());
 
         if (optionalProduct.isEmpty()) {
+            log.warn("Product does not found or is deleted under the seller {}", seller.getEmail());
             throw new ResourceNotFoundException("Product is either deleted or does not belong to the logged in seller!");
         }
 
         Product product = optionalProduct.get();
 
         if (!product.isActive()) {
+            log.warn("Product is in-active!");
             throw new BadRequestException("Product is not active!");
         }
 
@@ -561,10 +563,12 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product does not found!"));
 
         if (product.isDeleted() || !product.isActive()) {
+            log.warn("Product is either deleted or in-active!");
             throw new BadRequestException("Product is either deleted or deActive!");
         }
 
         if (product.getProductVariations() == null || product.getProductVariations().isEmpty()) {
+            log.error("Product has no product variations!");
             throw new BadRequestException("Product has no product variations!");
         }
 
@@ -627,6 +631,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category Id does not exists!"));
 
         if (categoryRepository.hasSubCategories(id)) {
+            log.warn("Category passed is not a leaf category!");
             throw new BadRequestException("Category passed is not a leaf category!");
         }
 
@@ -758,6 +763,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product does not found with the given id!"));
 
         if (product.isActive()) {
+            log.warn("Product is already in activated mode!");
             throw new BadRequestException("Product is already activated by the admin!");
         }
 
@@ -780,6 +786,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product does not found with the given id!"));
 
         if (!product.isActive()) {
+            log.warn("Product is already in deActivated mode!");
             throw new BadRequestException("Product is already not active or has been deActivated by the admin!");
         }
 

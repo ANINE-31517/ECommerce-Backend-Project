@@ -99,68 +99,6 @@ public class CustomerService {
                 customer.getRoles().getAuthority());
     }
 
-//    public TokenResponseVO loginCustomer(CustomerLoginCO request) {
-//
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        Customer customer = customerRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
-//
-//        if (!customer.isActive())
-//            throw new BadRequestException("Account is not activated");
-//
-//        if (customer.isLocked())
-//            throw new BadRequestException("Account is locked");
-//
-//        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-//            customer.setInvalidAttemptCount(customer.getInvalidAttemptCount() + 1);
-//
-//            if (customer.getInvalidAttemptCount() >= 3) {
-//                customer.setLocked(true);
-//                emailService.sendEmail(customer.getEmail(), "Account Locked",
-//                        "Your account is locked due to 3 failed login attempts.");
-//            }
-//
-//            customerRepository.save(customer);
-//            throw new BadRequestException("Invalid credentials");
-//        }
-//
-//        customer.setInvalidAttemptCount(0);
-//        customerRepository.save(customer);
-//
-//        String accessToken = jwtService.generateAccessToken(customer);
-//        String refreshToken = jwtService.generateRefreshToken(customer);
-//        logger.info("accessToken {}", accessToken);
-//        logger.info("refreshToken {}", refreshToken);
-//
-//        tokenService.saveTokenPair(customer, accessToken, refreshToken);
-//
-//        return TokenResponseVO.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
-
-//    public void logoutCustomer(String request) {
-//
-//        if (request == null || !request.startsWith("Bearer ")) {
-//            throw new BadRequestException("Access token is missing or invalid format!");
-//        }
-//
-//        String token = request.substring(7);
-//
-//        if (!tokenService.isAccessTokenValid(token)) {
-//            throw new UnauthorizedException("Invalid or expired access token!");
-//        }
-//
-//        tokenService.invalidateToken(token);
-//    }
-
     public Page<CustomerRegisteredVO> getAllCustomers(int pageOffset, int pageSize, String sortBy, String email) {
         List<String> allowedSortFields = UserConstant.ALLOWED_SORT_FIELDS;
 

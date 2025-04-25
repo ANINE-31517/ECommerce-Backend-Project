@@ -163,7 +163,7 @@ public class CategoryService {
     }
 
     public CategoryViewVO viewCategory(String id) {
-        UUID categoryId = null;
+        UUID categoryId;
         try {
             categoryId = UUID.fromString(id);
         } catch (IllegalArgumentException ex) {
@@ -237,7 +237,7 @@ public class CategoryService {
         String name = request.getName().trim();
         String categoryCOId = request.getCategoryId();
 
-        UUID categoryId = null;
+        UUID categoryId;
         try {
             categoryId = UUID.fromString(categoryCOId);
         } catch (IllegalArgumentException ex) {
@@ -284,6 +284,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category does not found!"));
 
         if (categoryRepository.hasSubCategories(category.getId())) {
+            log.warn("Category with ID {} is not a leaf category!", categoryId);
             throw new BadRequestException("Metadata can only be added to a leaf category (no subcategories)");
         }
 
@@ -319,6 +320,7 @@ public class CategoryService {
 
             categoryMetaDataFieldValueRepository.save(fieldValue);
         }
+        log.info("Metadata field values added successfully for category: {}!", category.getName());
     }
 
     @Transactional
@@ -334,6 +336,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (categoryRepository.hasSubCategories(category.getId())) {
+            log.warn("Category ID {} is not a leaf category!", categoryId);
             throw new BadRequestException("Metadata can only be updated for a leaf category (no subcategories)");
         }
 
@@ -378,6 +381,7 @@ public class CategoryService {
 
             categoryMetaDataFieldValueRepository.save(existing);
         }
+        log.info("Metadata field values added successfully for the category: {}!", category.getName());
     }
 
     public List<SellerCategoryViewSummaryVO> viewAllSellerCategory() {
@@ -421,7 +425,7 @@ public class CategoryService {
 
     private void getParentHierarchy(Category parent, List<CategoryViewSummaryVO> parentHierarchy) {
         while (parent != null) {
-            parentHierarchy.add(0, CategoryViewSummaryVO.builder()
+            parentHierarchy.addFirst(CategoryViewSummaryVO.builder()
                     .id(parent.getId())
                     .name(parent.getName())
                     .build());
@@ -494,7 +498,8 @@ public class CategoryService {
                 .map(Product::getBrand)
                 .collect(Collectors.toSet());
 
-        Double minPrice = Double.MAX_VALUE, maxPrice = 0.0;
+        Double minPrice = Double.MAX_VALUE;
+        Double maxPrice = 0.0;
         List<ProductVariation> productVariations = productVariationRepository.findByProductIn(products);
         for (ProductVariation variation : productVariations) {
             if (variation.isActive()) {

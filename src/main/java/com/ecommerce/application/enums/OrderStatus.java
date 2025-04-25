@@ -24,12 +24,11 @@ public enum OrderStatus {
             case ORDER_SHIPPED -> next == DELIVERED;
             case DELIVERED -> next == RETURN_REQUESTED || next == CLOSED;
             case RETURN_REQUESTED -> next == RETURN_REJECTED || next == RETURN_APPROVED;
-            case RETURN_REJECTED -> next == CLOSED;
+            case RETURN_REJECTED, REFUND_COMPLETED -> next == CLOSED;
             case RETURN_APPROVED -> next == PICK_UP_INITIATED;
             case PICK_UP_INITIATED -> next == PICK_UP_COMPLETED;
             case PICK_UP_COMPLETED -> next == REFUND_INITIATED;
             case REFUND_INITIATED -> next == REFUND_COMPLETED;
-            case REFUND_COMPLETED -> next == CLOSED;
             case CLOSED -> false;
         };
     }

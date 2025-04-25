@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,5 +19,9 @@ public interface ActivationTokenRepository extends JpaRepository<ActivationToken
     @Modifying
     @Query("delete from ActivationToken t where t.customer = :customer")
     void deleteByCustomer(@Param("customer") Customer customer);
+
+    @Modifying
+    @Query("delete from ActivationToken a where a.expiryDate < :cutoffTime")
+    void deleteByExpiryDateBefore(@Param("cutoffTime") LocalDateTime cutoffTime);
 }
 

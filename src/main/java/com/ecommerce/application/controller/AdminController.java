@@ -21,20 +21,6 @@ public class AdminController {
     private final CustomerService customerService;
     private final SellerService sellerService;
 
-//    @PostMapping("/login")
-//    public ResponseEntity<TokenResponseVO> loginAdmin(@Valid @RequestBody AdminLoginCO request) {
-//        TokenResponseVO responseVO = adminService.loginAdmin(request);
-//        return ResponseEntity.ok(responseVO);
-//    }
-
-//    @PostMapping("/logout")
-//    @PreAuthorize("hasAuthority('ADMIN')")
-//    public ResponseEntity<String> logoutAdmin(@RequestHeader("Authorization") String request) {
-//        adminService.logoutAdmin(request);
-//        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
-//    }
-
-
     @GetMapping("/get-customer")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<CustomerRegisteredVO>> getAllCustomers(

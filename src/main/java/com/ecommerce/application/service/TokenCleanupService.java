@@ -1,5 +1,6 @@
 package com.ecommerce.application.service;
 
+import com.ecommerce.application.repository.ActivationTokenRepository;
 import com.ecommerce.application.repository.TokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +16,17 @@ import java.time.LocalDateTime;
 public class TokenCleanupService {
 
     private final TokenRepository tokenRepository;
+    private final ActivationTokenRepository activationTokenRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void cleanExpiredTokens() {
-        LocalDateTime cutoffTime = LocalDateTime.now().minusHours(24);
-        tokenRepository.deleteByLastUpdatedBefore(cutoffTime);
+        LocalDateTime now = LocalDateTime.now();
+
+        tokenRepository.deleteByLastUpdatedBefore(now.minusHours(24));
+        activationTokenRepository.deleteByExpiryDateBefore(now);
 
         log.info("All the expired token have been cleared out from the Token entity!");
+        log.info("Expired activation tokens deleted at {}", now);
     }
 }

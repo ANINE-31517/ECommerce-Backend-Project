@@ -122,67 +122,6 @@ public class SellerService {
                 seller.getRoles().getAuthority());
     }
 
-//    public TokenResponseVO loginSeller(SellerLoginCO request) {
-//
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        Seller seller = sellerRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
-//
-//        if (!seller.isActive())
-//            throw new BadRequestException("Account is not activated");
-//
-//        if (seller.isLocked())
-//            throw new BadRequestException("Account is locked");
-//
-//        if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
-//            seller.setInvalidAttemptCount(seller.getInvalidAttemptCount() + 1);
-//
-//            if (seller.getInvalidAttemptCount() >= 3) {
-//                seller.setLocked(true);
-//                emailService.sendEmail(seller.getEmail(), "Account Locked",
-//                        "Your account is locked due to 3 failed login attempts.");
-//            }
-//
-//            sellerRepository.save(seller);
-//            throw new BadRequestException("Invalid credentials");
-//        }
-//
-//        seller.setInvalidAttemptCount(0);
-//        sellerRepository.save(seller);
-//
-//        String accessToken = jwtService.generateAccessToken(seller);
-//        String refreshToken = jwtService.generateRefreshToken(seller);
-//        logger.info("accessToken {}", accessToken);
-//        logger.info("refreshToken {}", refreshToken);
-//
-//        tokenService.saveTokenPair(seller, accessToken, refreshToken);
-//
-//        return TokenResponseVO.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
-
-//    public void logoutSeller(String request) {
-//        if (request == null || !request.startsWith("Bearer ")) {
-//            throw new BadRequestException("Access token is missing or invalid format!");
-//        }
-//
-//        String token = request.substring(7);
-//
-//        if (!tokenService.isAccessTokenValid(token)) {
-//            throw new UnauthorizedException("Invalid or expired access token!");
-//        }
-//
-//        tokenService.invalidateToken(token);
-//    }
-
     public Page<SellerRegisteredVO> getAllSellers(int pageOffset, int pageSize, String sortBy, String email) {
         log.info("Fetching sellers - pageOffset: {}, pageSize: {}, sortBy: {}, emailFilter: {}", pageOffset, pageSize, sortBy, email);
 

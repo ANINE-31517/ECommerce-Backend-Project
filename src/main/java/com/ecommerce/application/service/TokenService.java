@@ -4,7 +4,6 @@ import com.ecommerce.application.CO.RefreshTokenCO;
 import com.ecommerce.application.VO.NewAccessTokenVO;
 import com.ecommerce.application.entity.Token;
 import com.ecommerce.application.entity.User;
-import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.exception.UnauthorizedException;
 import com.ecommerce.application.repository.TokenRepository;

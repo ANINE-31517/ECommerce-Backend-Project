@@ -28,19 +28,6 @@ public class SellerController {
         return ResponseEntity.ok(message);
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<TokenResponseVO> loginSeller(@Valid @RequestBody SellerLoginCO request) {
-//        TokenResponseVO responseVO = sellerService.loginSeller(request);
-//        return ResponseEntity.ok(responseVO);
-//    }
-
-//    @PostMapping("/logout")
-//    @PreAuthorize("hasAuthority('SELLER')")
-//    public ResponseEntity<String> logoutSeller(@RequestHeader("Authorization") String request) {
-//        sellerService.logoutSeller(request);
-//        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
-//    }
-
     @GetMapping("/profile")
     @PreAuthorize("hasAuthority('SELLER')")
     public ResponseEntity<SellerProfileVO> getSellerProfile() {

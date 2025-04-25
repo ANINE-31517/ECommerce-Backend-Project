@@ -32,6 +32,5 @@ public class ActivationToken {
     private Customer customer;
 
     private LocalDateTime expiryDate;
-
 }
 

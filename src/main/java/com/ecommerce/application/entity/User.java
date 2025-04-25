@@ -1,6 +1,5 @@
 package com.ecommerce.application.entity;
 
-//import com.ecommerce.application.audit.Auditable;
 import com.ecommerce.application.audit.Auditable;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

@@ -47,19 +47,6 @@ public class CustomerController {
         return ResponseEntity.ok(message);
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<TokenResponseVO> loginCustomer(@Valid @RequestBody CustomerLoginCO request) {
-//        TokenResponseVO responseVO = customerService.loginCustomer(request);
-//        return ResponseEntity.ok(responseVO);
-//    }
-
-//    @PostMapping("/logout")
-//    @PreAuthorize("hasAuthority('CUSTOMER')")
-//    public ResponseEntity<String> logoutCustomer(@RequestHeader("Authorization") String request) {
-//        customerService.logoutCustomer(request);
-//        return ResponseEntity.ok("Logout successful. Access token is now invalidated.");
-//    }
-
     @GetMapping("/profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<CustomerProfileVO> getCustomerProfile() {

@@ -1,7 +1,6 @@
 package com.ecommerce.application.repository;
 
 import com.ecommerce.application.entity.Token;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
