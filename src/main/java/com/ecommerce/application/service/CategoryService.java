@@ -106,7 +106,7 @@ public class CategoryService {
                     .orElseThrow(() -> new ResourceNotFoundException("Parent category does not found!"));
         }
 
-        if (!isNameUniqueInHierarchy(request.getName(), parentCategory)) {
+        if (!isNameUniqueInHierarchy(request.getName(), parentCategory, 0)) {
             log.error("Category name '{}' already exists in the hierarchy!", request.getName());
             throw new BadRequestException("Category name must be unique in the hierarchy!");
         }
@@ -129,19 +129,21 @@ public class CategoryService {
                 .build();
     }
 
-    private boolean isNameUniqueInHierarchy(String name, Category category) {
-
-        if (category == null) {
-            return !categoryRepository.existsByNameAndParentCategoryIsNull(name);
-        }
-
-        Category root = category;
-        while (root.getParentCategory() != null) {
-            root = root.getParentCategory();
+    private boolean isNameUniqueInHierarchy(String name, Category category, int flag) {
+//        Category root = category;
+//        while (root.getParentCategory() != null) {
+//            root = root.getParentCategory();
+//        }
+        Category currentParent = category;
+        while (currentParent != null) {
+            if (currentParent.getName().equalsIgnoreCase(name)) {
+                return false;
+            }
+            currentParent = currentParent.getParentCategory();
         }
 
         Queue<Category> queue = new LinkedList<>();
-        queue.add(root);
+        queue.add(category);
 
         while (!queue.isEmpty()) {
             Category current = queue.poll();
@@ -155,11 +157,24 @@ public class CategoryService {
                 queue.addAll(children);
             }
         }
+
+        if (category == null) {
+            return !categoryRepository.existsByNameAndParentCategoryIsNull(name);
+        }
+
+        if (flag == 1 && category.getParentCategory() != null) {
+            List<Category> parentCategoryImmediateChild = category.getParentCategory().getSubCategories();
+
+            for (Category immediateChild: parentCategoryImmediateChild) {
+                if (immediateChild.getName().equalsIgnoreCase(name))
+                    return false;
+            }
+        }
         return true;
     }
 
     private boolean parentHasProducts(Category category) {
-        return category.getProducts() != null && !category.getProducts().isEmpty();
+        return productRepository.existsProductByCategory(category);
     }
 
     public CategoryViewVO viewCategory(String id) {
@@ -251,14 +266,9 @@ public class CategoryService {
             throw new BadRequestException("Same name provided!");
         }
 
-        if (!isNameUniqueInHierarchy(name, category)) {
+        if (!isNameUniqueInHierarchy(name, category, 1)) {
             log.error("Category name '{}' already present in the hierarchy!", request.getName());
             throw new BadRequestException("Category name must be unique in the hierarchy!");
-        }
-
-        if (parentHasProducts(category)) {
-            log.error("Category with Id {} already has products!", categoryId);
-            throw new BadRequestException("Cannot add a sub-category to a category that already has products!");
         }
 
         category.setName(name);
