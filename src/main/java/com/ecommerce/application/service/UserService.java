@@ -174,7 +174,6 @@ public class UserService {
 
 
     public void logoutUser(String request) {
-
         if (request == null || !request.startsWith("Bearer ")) {
             log.warn("Access token is missing or invalid format!");
             throw new UnauthorizedException("Access token is missing or invalid format!");

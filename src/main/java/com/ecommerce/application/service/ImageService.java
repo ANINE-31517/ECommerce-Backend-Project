@@ -4,10 +4,12 @@ import com.ecommerce.application.config.ImageStorageConfig;
 import com.ecommerce.application.constant.ImageConstant;
 import com.ecommerce.application.entity.ProductVariation;
 import com.ecommerce.application.entity.User;
+import com.ecommerce.application.exception.AccessDeniedException;
 import com.ecommerce.application.exception.BadRequestException;
 import com.ecommerce.application.exception.ResourceNotFoundException;
 import com.ecommerce.application.repository.ProductVariationRepository;
 import com.ecommerce.application.repository.UserRepository;
+import com.ecommerce.application.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -41,11 +43,14 @@ public class ImageService {
     private static final List<String> allowedExtensions = ImageConstant.ALLOWED_EXTENSIONS;
 
     public void uploadUserImage(UUID userId, MultipartFile file) throws IOException {
-
         Optional<User> userOpt = userRepository.findById(userId);
-
         if(userOpt.isEmpty()) {
             throw new ResourceNotFoundException("User Id not found!");
+        }
+
+        User user = SecurityUtil.getCurrentUser();
+        if (!user.getId().equals(userId)) {
+            throw new AccessDeniedException("Image user id does not belong to the logged in user!");
         }
 
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -74,6 +79,11 @@ public class ImageService {
         if(userOpt.isEmpty()) {
             log.error("User Id not found!");
             throw new ResourceNotFoundException("User Id not found!");
+        }
+
+        User user = SecurityUtil.getCurrentUser();
+        if (!user.getId().equals(userId)) {
+            throw new AccessDeniedException("Image user id does not belong to the logged in user!");
         }
 
         Path directoryPath = Paths.get(imageStorageConfig.getBasePath(), "users");
@@ -145,6 +155,19 @@ public class ImageService {
 
         if (!allowedExtensions.contains(extension)) {
             throw new BadRequestException("Only jpg, jpeg, png, bmp files are allowed!");
+        }
+
+        Optional<ProductVariation> productVariationOptional = productVariationRepository.findById(productVariationId);
+
+        if (productVariationOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Product variation id not found!");
+        }
+
+        ProductVariation productVariation = productVariationOptional.get();
+
+        User user = SecurityUtil.getCurrentUser();
+        if (!user.getId().equals(productVariation.getProduct().getSeller().getId())) {
+            throw new java.nio.file.AccessDeniedException("The product does not belong to the logged in seller!");
         }
 
         String filePath = getProductVariationImagePath(productVariationId, extension, imageCount);

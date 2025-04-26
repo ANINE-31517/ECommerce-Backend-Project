@@ -130,10 +130,6 @@ public class CategoryService {
     }
 
     private boolean isNameUniqueInHierarchy(String name, Category category, int flag) {
-//        Category root = category;
-//        while (root.getParentCategory() != null) {
-//            root = root.getParentCategory();
-//        }
         Category currentParent = category;
         while (currentParent != null) {
             if (currentParent.getName().equalsIgnoreCase(name)) {

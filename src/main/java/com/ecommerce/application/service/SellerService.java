@@ -53,7 +53,6 @@ public class SellerService {
 
     @Transactional
     public void registerSeller(SellerRegistrationCO request) {
-
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             log.error("Registration failed email {} already exists!", request.getEmail());
             throw new BadRequestException("Email already exists");
@@ -233,7 +232,6 @@ public class SellerService {
     }
 
     private SellerProfileVO convertToSellerProfileVO(Seller seller) {
-
         String imageUrl = "Image not uploaded!";
 
         for (String ext : allowedExtensions) {

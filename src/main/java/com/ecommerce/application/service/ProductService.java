@@ -364,7 +364,6 @@ public class ProductService {
     }
 
     public ProductVariationViewVO convertToProductVariationViewVO(ProductVariation productVariation) {
-
         String primaryImageUrl = "Image not uploaded!";
 
         for (String ext : ImageConstant.ALLOWED_EXTENSIONS) {
@@ -551,7 +550,6 @@ public class ProductService {
     }
 
     public CustomerProductViewVO customerProductView(String id) {
-
         UUID productId;
         try {
             productId = UUID.fromString(id);
@@ -616,7 +614,6 @@ public class ProductService {
     }
 
     public Page<CustomerProductViewVO> allCustomerProductView(UUID id, int offset, int max, String sort, String order, String query) {
-
         if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
             log.error("Invalid sorting type is passed, choose among (name, brand, dateCreated)!");
             throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");
@@ -651,7 +648,6 @@ public class ProductService {
     }
 
     public Page<CustomerProductViewVO> similarCustomerProductView(UUID id, int offset, int max, String sort, String order, String query) {
-
         if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
             log.error("Invalid sort type is passed, choose among (name, brand, dateCreated)!");
             throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");
@@ -681,7 +677,6 @@ public class ProductService {
     }
 
     public AdminProductViewVO adminProductView(String id) {
-
         UUID productId;
         try {
             productId = UUID.fromString(id);
@@ -726,7 +721,6 @@ public class ProductService {
     }
 
     public Page<AdminProductViewVO> adminAllProductView(int offset, int max, String sort, String order, String query) {
-
         if (!CategoryConstant.ALLOWED_SORT_FIELDS_ALL_PRODUCT_VIEW_ADMIN.contains(sort)) {
             log.error("Invalid sorting type passed, choose among (name, brand, dateCreated)!");
             throw new BadRequestException("Only 'name', 'brand' and 'dateCreated' are allowed in sort field.");

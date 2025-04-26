@@ -51,7 +51,6 @@ public class JwtService {
     }
 
     public boolean validateAccessToken(String token) {
-
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
@@ -66,7 +65,6 @@ public class JwtService {
     }
 
     public boolean validateRefreshToken(String token) {
-
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
