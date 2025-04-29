@@ -51,7 +51,7 @@ public class PasswordResetService {
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
-        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(tokenTime));
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
         tokenRepository.save(resetToken);
 
         String resetLink = "http://localhost:8080/api/reset/forgot-password?token=" + token;

@@ -40,7 +40,7 @@ public class CustomerController {
     }
 
     @PostMapping("/resend-activation-link")
-    public ResponseEntity<String> resendActivationLink(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> resendActivationLink(@Valid @RequestBody Map<String, String> request) {
         String email = request.get("email");
         activationService.resendActivationLink(email);
         String message = messageSource.getMessage("customer.resend.activate.link.success", null, LocaleContextHolder.getLocale());

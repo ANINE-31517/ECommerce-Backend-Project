@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, UUID> {
+
     Optional<Token> findByAccessToken(String accessToken);
     Optional<Token> findByRefreshToken(String accessToken);
 

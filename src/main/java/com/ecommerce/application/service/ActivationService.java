@@ -95,7 +95,7 @@ public class ActivationService {
         ActivationToken activationToken = new ActivationToken();
         activationToken.setToken(newToken);
         activationToken.setCustomer(customer);
-        activationToken.setExpiryDate(LocalDateTime.now().plusHours(tokenTime));
+        activationToken.setExpiryDate(LocalDateTime.now().plusMinutes(tokenTime));
 
         tokenRepository.save(activationToken);
 

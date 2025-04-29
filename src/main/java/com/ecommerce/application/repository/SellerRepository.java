@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface SellerRepository extends JpaRepository<Seller, UUID> {
+
     Optional<Seller> findByGst(String gst);
     Optional<Seller> findByCompanyName(String companyName);
     boolean existsByCompanyName(String companyName);

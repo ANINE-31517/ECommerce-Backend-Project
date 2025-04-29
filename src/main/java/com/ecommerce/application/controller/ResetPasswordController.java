@@ -3,6 +3,7 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.CO.ForgotPasswordCO;
 import com.ecommerce.application.CO.ResetPasswordCO;
 import com.ecommerce.application.service.PasswordResetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -18,14 +19,14 @@ public class ResetPasswordController {
     private final MessageSource messageSource;
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordCO request) {
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordCO request) {
         passwordResetService.forgotPassword(request);
         String message = messageSource.getMessage("forget.password.link.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordCO request) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordCO request) {
         passwordResetService.resetPassword(request);
         String message = messageSource.getMessage("reset.password.success", null, LocaleContextHolder.getLocale());
         return ResponseEntity.ok(message);
