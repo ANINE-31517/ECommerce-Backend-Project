@@ -1,0 +1,1093 @@
+{
+	"info": {
+		"_postman_id": "2472080f-76e9-4d73-9e99-5d78c0405764",
+		"name": "ECommerce",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "42604535",
+		"_collection_link": "https://am5555-3311.postman.co/workspace/40b763aa-c159-4aec-8647-5c4dad84c162/collection/42604535-2472080f-76e9-4d73-9e99-5d78c0405764?action=share&source=collection_link&creator=42604535"
+	},
+	"item": [
+		{
+			"name": "ADMIN APIs",
+			"item": [
+				{
+					"name": "API to list all the registered customers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTY5MEBnbWFpbC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQxOTY2NjgsImV4cCI6MTc0NDIwMzg2OH0.D0STY6KB-P2tu8mrlxNMyxCMajeQmFHFIoY-ZKcITNI"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getCustomer?pageOffset=0&pageSize=2&sortBy=createdAt",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getCustomer"
+							],
+							"query": [
+								{
+									"key": "pageOffset",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API to list all the registered sellers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQxOTU3NTQsImV4cCI6MTc0NDIwMjk1NH0.RQQrSuqgAUt-tavvcxYNu01fhAYDPSEfaoSGDDFg8m4"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getSeller?pageOffset=0&pageSize=3&sortBy=createdAt",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getSeller"
+							],
+							"query": [
+								{
+									"key": "pageOffset",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "3"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API to login an admin into the system",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin123@gmail.com\",\n  \"password\": \"admin@123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/admin/login"
+					},
+					"response": []
+				},
+				{
+					"name": "API to logout an admin from the system",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ1NDA5MTQsImV4cCI6MTc0NDU0ODExNH0.9qjT1sxbTwqE_ZwxqpE7BsJTz7SKSNaSgHv9OMU9DrM"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:8080/api/admin/logout"
+					},
+					"response": []
+				},
+				{
+					"name": "API to activate a customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQyNjMyOTcsImV4cCI6MTc0NDI3MDQ5N30.czRG9SDGNqJUQeFT2gkfYw-8qSOsoB0gW83fk-hXlrI"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "http://localhost:8080/api/admin/activateCustomer/d039c013-94f1-4f51-97bf-fc9ead1c8e97"
+					},
+					"response": []
+				},
+				{
+					"name": "API to activate a seller",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQyNjMyOTcsImV4cCI6MTc0NDI3MDQ5N30.czRG9SDGNqJUQeFT2gkfYw-8qSOsoB0gW83fk-hXlrI"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "http://localhost:8080/api/admin/activateSeller/64275205-a3a7-447a-96e1-937d2b2d76d4"
+					},
+					"response": []
+				},
+				{
+					"name": "API to de-activate a customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQyNjMyOTcsImV4cCI6MTc0NDI3MDQ5N30.czRG9SDGNqJUQeFT2gkfYw-8qSOsoB0gW83fk-hXlrI"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "http://localhost:8080/api/admin/deActivateCustomer/671f6934-1fc7-4ce2-bce6-8b176834ed52"
+					},
+					"response": []
+				},
+				{
+					"name": "API to de-activate a seller",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQyNjMyOTcsImV4cCI6MTc0NDI3MDQ5N30.czRG9SDGNqJUQeFT2gkfYw-8qSOsoB0gW83fk-hXlrI"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "http://localhost:8080/api/admin/deActivateSeller/64275205-a3a7-447a-96e1-937d2b2d76d4"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CUSTOMER APIs",
+			"item": [
+				{
+					"name": "API to activate the customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/customers/activate?token=5c0e256b-2287-4474-97b8-7318e366dc8e",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"customers",
+								"activate"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "5c0e256b-2287-4474-97b8-7318e366dc8e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API to view customer profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTU5MEBnbWFpbC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQzMDQxOTksImV4cCI6MTc0NDMxMTM5OX0.5gRauhhP8ARgYaBB3WMMI6QKxwpXEszwYe3merS_JS0"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/customers/profile"
+					},
+					"response": []
+				},
+				{
+					"name": "API to register a customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"abhinavdwivedi290@gmail.com\",\n  \"contact\": \"+1234567890\",\n  \"password\": \"SecurePassword123!\",\n  \"confirmPassword\": \"SecurePassword123!\",\n  \"firstName\": \"Abhinav\",\n  \"lastName\": \"Dwivedi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/customers/register"
+					},
+					"response": []
+				},
+				{
+					"name": "API to re-send activation link",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"abhinavdwivedi190@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/customers/resendActivationLink"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add a new address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTE5MEBnbWFpbC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ2MjkzNjYsImV4cCI6MTc0NDYzNjU2Nn0.b_J_nxin-3ug2sd99C0YNn9KvY2n-9qCF4QHgHocqLU"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"New York\",\n  \"state\": \"New York\",\n  \"country\": \"Hong Kong\",\n  \"addressLine\": \"124 Main Street, Apt 56B\",\n  \"zipCode\": \"208010\",\n  \"label\": \"Office\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/customers/addAddress"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update customer profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTE5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ0NTQwNDcwLCJleHAiOjE3NDQ1NDc2NzB9.NOWBjI0QZauQvM_g7x6chDv0E6PX4MpqDLY4KUiYzr8"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Abhinav\",\n  \"lastName\": \"Dubey\",\n  \"contact\": \"9876543210\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/customers/updateProfile"
+					},
+					"response": []
+				},
+				{
+					"name": "API to delete an address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTE5MEBnbWFpbC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ2MjkzNjYsImV4cCI6MTc0NDYzNjU2Nn0.b_J_nxin-3ug2sd99C0YNn9KvY2n-9qCF4QHgHocqLU"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8080/api/customers/deleteAddress/e9480d12-da15-43ef-aa8b-b3cc9f16517d"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SELLER APIs",
+			"item": [
+				{
+					"name": "API to view seller profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTg5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ0MjgzMTQzLCJleHAiOjE3NDQyOTAzNDN9.gd8kOZj9uJlWCJKdfRgsgRgNVQnSMXqMWjT3fv3vumA"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/sellers/profile"
+					},
+					"response": []
+				},
+				{
+					"name": "API to register a seller",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"abhinavdwivedi990@gmail.com\",\n  \"firstName\": \"Abhinav\",\n  \"lastName\": \"Dwivedi\",\n  \"password\": \"Password1@\",\n  \"confirmPassword\": \"Password1@\",\n  \"companyAddress\": {\n    \"city\": \"New York\",\n    \"country\": \"USA\",\n    \"addressLine\": \"123 Main Street\",\n    \"zipCode\": 10001,\n    \"label\": \"Office\"\n  },\n  \"gst\": \"07ABCDE1234F2Z6\",\n  \"companyContact\": \"9876543210\",\n  \"companyName\": \"ABC Ltd\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/sellers/register"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update seller profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTE5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ0NTQwOTYxLCJleHAiOjE3NDQ1NDgxNjF9.qX2yiz5O04kh5RtPWFNGHOiyj6PBR0zd17lQkNIR8_Y"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Abhinav\",\n  \"lastName\": \"Dubey\",\n  \"companyName\": \"NextGen Innovations\",\n  \"companyContact\": \"9876543210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/sellers/updateProfile"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "COMMON APIs",
+			"item": [
+				{
+					"name": "Test API",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQxMDUyMDAsImV4cCI6MTc0NDExMjQwMH0.iehOA0KputetBTrinGpBWnxCBMSq38Iy_IXfqVFunlQ"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/test/admin"
+					},
+					"response": []
+				},
+				{
+					"name": "API to get the uploaded image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTg5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ0MjgzMTQzLCJleHAiOjE3NDQyOTAzNDN9.gd8kOZj9uJlWCJKdfRgsgRgNVQnSMXqMWjT3fv3vumA"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/images/users/dc9e57cb-c393-4502-8725-0e7ecfe07cc8"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view addresses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ0NTU0NzYsImV4cCI6MTc0NDQ2MjY3Nn0.i75mxlxyMo_8emR3zJ6kYCFTbwYmA24-YHZDGeB1Gc4"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/user/getAddress"
+					},
+					"response": []
+				},
+				{
+					"name": "API to login an user into the system",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin123@gmail.com\",\n  \"password\": \"admin@123\"\n}\n\n// {\n//   \"email\": \"abhinavdwivedi190@gmail.com\",\n//   \"password\": \"SecurePassword123!\"\n// }\n\n// {\n//   \"email\": \"abhinavdwivedi190@gmail.com\",\n//   \"password\": \"Password1@\"\n// }\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/user/login"
+					},
+					"response": []
+				},
+				{
+					"name": "API to logout an user from the system",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjAxQGdtYWlsLmNvbSIsInJvbGUiOiJDVVNUT01FUiIsInRva2VuVHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc0NTUxNTUwMywiZXhwIjoxNzQ1NTIyNzAzfQ.LLIP5a7hNmRpTvzWgm2tNb2PLLv9-FLHn4-caqIsq18"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:8080/api/user/logout"
+					},
+					"response": []
+				},
+				{
+					"name": "API to receive a new access token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJSRUZSRVNIIiwiaWF0IjoxNzQ0MTMzMjYyLCJleHAiOjE3NDQyMTk2NjJ9.Pa4q4km3Kd2X3mAEMkuBkBmZyqy3UEPp35-SUKLiaCI\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/token/refresh"
+					},
+					"response": []
+				},
+				{
+					"name": "API to upload an image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTk5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ0Mjc3ODA2LCJleHAiOjE3NDQyODUwMDZ9.xiQRl-TFPnypnWf4mqteMf0I_-mb0gYSRQg0eY2qVOE"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/abhinav/Desktop/Project/images/example.jpg"
+								}
+							]
+						},
+						"url": "http://localhost:8080/api/images/users/13c94a1e-e33e-4ba7-97fe-fba37bd539ee/upload"
+					},
+					"response": []
+				},
+				{
+					"name": "API to receive a token based url",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"abhinavdwivedi590@gmail.com\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/reset/forgotPassword"
+					},
+					"response": []
+				},
+				{
+					"name": "API to reset the password using the token",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"2b522c23-9c85-447a-956e-80cad4cd70e7\",\n    \"password\": \"Password1$\",\n    \"confirmPassword\": \"assword1$\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/reset/resetPassword"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update user password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQzNjc3NDUsImV4cCI6MTc0NDM3NDk0NX0.BMMCJkFc4qMOI3Q2xIlIA13p4cagFBukHyzOe_tr6kY"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"Password1%\",\n    \"confirmPassword\": \"Password1%\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/user/updatePassword"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update an address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTI5MEBnbWFpbC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQzOTI2MjYsImV4cCI6MTc0NDM5OTgyNn0.GZZtcL5KSowM3WZT6moABqKJa9Q4TYftpoV5s3UxyiU"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"fa0b0a8a-5148-4501-8f5c-b6c99fd5919d\",\n  \"city\": \"New York\",\n  \"state\": \"New York\",\n  \"country\": \"USA\",\n  \"addressLine\": \"1234 Main Street, Apt 56B\",\n  \"zipCode\": \"10001\",\n  \"label\": \"Home\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/user/addressUpdate"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category APIs",
+			"item": [
+				{
+					"name": "API to view all Metadata fields",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ3MTg4OTYsImV4cCI6MTc0NDcyNjA5Nn0.-nP9e1mMBGoqxEsjOVcLznOZjQASn-M_cK939-KDSdI"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/category/admin/all-metadata-field?offset=0&max=3&sort=name&order=",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"category",
+								"admin",
+								"all-metadata-field"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "max",
+									"value": "3"
+								},
+								{
+									"key": "sort",
+									"value": "name"
+								},
+								{
+									"key": "order",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API to view a category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/category/admin/view-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view all categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ4MjE1NDYsImV4cCI6MTc0NDgyODc0Nn0.Hy2UTk1VabTf0P58XzckGD1_nFPrPhLeZyfFNxkA29I"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/category/admin/view-all-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to list all categories as a seller",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ5Njk3NDYsImV4cCI6MTc0NDk3Njk0Nn0.J4j7UfDGns7xwwY9xgWyU65aodbrfOSQJIfqggnYHPU"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/category//sellers/view-all-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to list all categories as a customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/category/customers/view-all-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to fetch filtering details for a category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjAxQGdtYWlsLmNvbSIsInJvbGUiOiJDVVNUT01FUiIsInRva2VuVHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc0NTQ5MDgzNCwiZXhwIjoxNzQ1NDk4MDM0fQ.0sgRcJVZa7j6YK6wk0u1rvxEOkc4KB3BjL2vGipjvV8"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/category/customers/filtering-details/64f15bc6-b631-4849-8d13-d2b52069e7db"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add a Metadata field",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ3MTg4OTYsImV4cCI6MTc0NDcyNjA5Nn0.-nP9e1mMBGoqxEsjOVcLznOZjQASn-M_cK939-KDSdI"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"size\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/category/admin/add-metadata-field"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add a category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ3OTk4MjgsImV4cCI6MTc0NDgwNzAyOH0.bhiPGY5ZYHCKBl8uOYQ2sk93ShUW0pM2gnf6Jbruac4"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"IOS\",\n    \"parentCategoryId\": \"0b6cc653-fb65-4d2f-8a08-fe8291757ee0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/category/admin/add-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add new category metadata field value(s) for a category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ4OTA1MzIsImV4cCI6MTc0NDg5NzczMn0.8Ljd-mPVbjjn5IGFvbrKYE9Zy94ax3iM35UFNsIYajA"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/category/admin/add-metadatafieldvalue"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update a category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ4MjE1NDYsImV4cCI6MTc0NDgyODc0Nn0.Hy2UTk1VabTf0P58XzckGD1_nFPrPhLeZyfFNxkA29I"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Electronics\",\n    \"categoryId\": \"92c2d865-5e9e-41c8-91a1-5dcfb5cb98ae\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/category/admin/update-category"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update values for an existing metadata field in a category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDQ5NTQzNTIsImV4cCI6MTc0NDk2MTU1Mn0.dL5uE8F_dDyvkyZMpJcDswm3AwwC7yiygwNQoaBPG18"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"d99d5f13-7f2a-4a45-ae23-6aa466b1cf14\",\n  \"fieldValues\": [\n    {\n      \"fieldId\": \"aa63a7ff-d6d1-4d64-88c4-4b3f3c409fef\",\n      \"values\": \"Red, Green, Blue\"\n    },\n    {\n      \"fieldId\": \"b5148c4e-f34f-4215-92dc-5a12a9e9c7c5\",\n      \"values\": \"Small, Medium\"\n    }\n  ]\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/category/admin/update-metadata-field-value"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product APIs",
+			"item": [
+				{
+					"name": "API to view a product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/view-product/"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view all products",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "API to view a product variation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbjEyM0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJpYXQiOjE3NDUyNTYzODEsImV4cCI6MTc0NTI2MzU4MX0.u5a69HUzpMfl8aVgo0PvWXkl4grkEN1vBsRkb1er588"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/view-product-variation/"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view all product variation(s) of a product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIwMUBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MzIyODQ4LCJleHAiOjE3NDUzMzAwNDh9.37VenTVN6lzyGO1hu3ur2waO5LxqVQOr30dXMLCkJfk"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/view-product-variation/f2a213c0-77b1-43b3-a942-12d3dc2a07c6"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view a product(Customer)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/customers/view-product/8ccacc14-34c8-4460-9c9e-dbd7a398c39d"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view all product(Customer)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjAxQGdtYWlsLmNvbSIsInJvbGUiOiJDVVNUT01FUiIsInRva2VuVHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc0NTQwMjg1NSwiZXhwIjoxNzQ1NDEwMDU1fQ.Gu5L0-KoWn0Sca2M7uDA12wwHZiibFPotpdbROQqXDY"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/customers/view-all-product/2e970aec-c59f-4159-a5d7-2eb349a063ac?offset=0&max=3&sort=name&order=asc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"customers",
+								"view-all-product",
+								"2e970aec-c59f-4159-a5d7-2eb349a063ac"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "max",
+									"value": "3"
+								},
+								{
+									"key": "sort",
+									"value": "name"
+								},
+								{
+									"key": "order",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API to view Similar product",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "API to view a product(Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZWxsZXIwMUBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MzM4MzgwLCJleHAiOjE3NDUzNDU1ODB9.uKgcJ_OT48gCDj2VGGFPKSpAu-JwZERgxNLrERoZ0S8"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/view-product/ad811149-8a52-4c33-b347-62eb8d59c04"
+					},
+					"response": []
+				},
+				{
+					"name": "API to view all product(Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/product/admin/view-all-product"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add a product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTk5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MDAxMDg0LCJleHAiOjE3NDUwMDgyODR9.JdEu9NcwUJdpFvpYbSKSswdFLFxz6tJ3waeuQ3fW13s"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/add-product"
+					},
+					"response": []
+				},
+				{
+					"name": "API to add a product variation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "productId",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": "http://localhost:8080/api/product/sellers/add-product-variation"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update a product variation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjAxQGdtYWlsLmNvbSIsInJvbGUiOiJDVVNUT01FUiIsInRva2VuVHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc0NTQyNzUxNCwiZXhwIjoxNzQ1NDM0NzE0fQ.IdxIXAJKZvkmuuPl75SWEWrqaehhjmdD638KUwINVCo"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": "http://localhost:8080/api/product/sellers/update-product-variation"
+					},
+					"response": []
+				},
+				{
+					"name": "API to update a product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/update-product"
+					},
+					"response": []
+				},
+				{
+					"name": "API to activate a product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTk5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MjUzMjMyLCJleHAiOjE3NDUyNjA0MzJ9.37BYzf_QxhxVmlCcnb9J4sCBnXdbS8gMNFCIxLqprhM"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:8080/api/product/admin/activate-product"
+					},
+					"response": []
+				},
+				{
+					"name": "API to de-activate a product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTk5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MjU2MjE5LCJleHAiOjE3NDUyNjM0MTl9.1x9f4b-gATCY3JI_l15vP8Qkcx9RFRfs193tnzrYtF0"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:8080/api/product/admin/de-activate-product/0e0a3be5-bf7f-4cbe-9d71-702d6c1fd953"
+					},
+					"response": []
+				},
+				{
+					"name": "API to delete a product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmhpbmF2ZHdpdmVkaTg5MEBnbWFpbC5jb20iLCJyb2xlIjoiU0VMTEVSIiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiaWF0IjoxNzQ1MDgzMTgxLCJleHAiOjE3NDUwOTAzODF9.ef5zGOYwzOYLT0HjsIdcLP4N6hSkXDCTS8UXMrRjyo8"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8080/api/product/sellers/delete-product/ad811149-8a52-4c33-b347-62eb8d59c04"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
